@@ -24,8 +24,7 @@ from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column
 from sqlalchemy.pool import NullPool, QueuePool
 from sqlalchemy.sql import func
 
-from backend.bufferiq.core.config import Settings
-
+from bufferiq.core.config import Settings
 logger = logging.getLogger(__name__)
 
 
