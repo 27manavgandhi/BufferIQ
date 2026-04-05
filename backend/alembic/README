@@ -1,0 +1,117 @@
+# Alembic Database Migrations
+
+Alembic manages database schema changes for BufferIQ using version-controlled migration scripts.
+
+## Common Commands
+
+### Create a New Migration
+
+**Auto-generate from model changes:**
+```bash
+alembic revision --autogenerate -m "description of change"
+```
+
+**Create empty migration:**
+```bash
+alembic revision -m "description of change"
+```
+
+### Apply Migrations
+
+**Upgrade to latest:**
+```bash
+alembic upgrade head
+```
+
+**Upgrade by specific steps:**
+```bash
+alembic upgrade +2  # Upgrade 2 versions forward
+```
+
+**Upgrade to specific revision:**
+```bash
+alembic upgrade <revision_id>
+```
+
+### Rollback Migrations
+
+**Downgrade by one step:**
+```bash
+alembic downgrade -1
+```
+
+**Downgrade to specific revision:**
+```bash
+alembic downgrade <revision_id>
+```
+
+**Downgrade all:**
+```bash
+alembic downgrade base
+```
+
+### View Migration History
+
+**Current version:**
+```bash
+alembic current
+```
+
+**Migration history:**
+```bash
+alembic history
+```
+
+**Verbose history:**
+```bash
+alembic history --verbose
+```
+
+### Verify Migrations
+
+**Show SQL without executing:**
+```bash
+alembic upgrade head --sql
+```
+
+**Check for pending migrations:**
+```bash
+alembic current
+alembic heads
+```
+
+## Migration Workflow
+
+1. **Make model changes** in `backend/bufferiq/domain/models.py`
+2. **Generate migration**: `alembic revision --autogenerate -m "add user table"`
+3. **Review migration** in `alembic/versions/`
+4. **Test migration**: `alembic upgrade head`
+5. **Test rollback**: `alembic downgrade -1`
+6. **Commit migration** to version control
+
+## Best Practices
+
+- Always review auto-generated migrations before applying
+- Test both upgrade and downgrade paths
+- Keep migrations small and focused
+- Write descriptive migration messages
+- Never edit applied migrations
+- Use data migrations for complex changes
+
+## Troubleshooting
+
+**Migration conflicts:**
+```bash
+alembic merge heads
+```
+
+**Stamp database without running migrations:**
+```bash
+alembic stamp head
+```
+
+**Reset to specific version:**
+```bash
+alembic downgrade base
+alembic upgrade head
+```
