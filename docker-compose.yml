@@ -8,15 +8,20 @@ services:
       POSTGRES_USER: bufferiq
       POSTGRES_PASSWORD: bufferiq_dev_password
       POSTGRES_DB: bufferiq
+      POSTGRES_INITDB_ARGS: "-A md5"
     ports:
       - "5432:5432"
     volumes:
       - postgres_data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U bufferiq"]
-      interval: 10s
-      timeout: 5s
+      test: ["CMD-SHELL", "pg_isready -U bufferiq -d bufferiq"]
+      interval: 5s
+      timeout: 3s
       retries: 5
+      start_period: 10s
+    networks:
+      - bufferiq-network
+    restart: unless-stopped
 
   redis:
     image: redis:7-alpine
@@ -27,11 +32,56 @@ services:
       - redis_data:/data
     healthcheck:
       test: ["CMD", "redis-cli", "ping"]
-      interval: 10s
-      timeout: 5s
+      interval: 5s
+      timeout: 3s
       retries: 5
-    command: redis-server --appendonly yes
+      start_period: 5s
+    command: redis-server --appendonly yes --maxmemory 256mb --maxmemory-policy allkeys-lru
+    networks:
+      - bufferiq-network
+    restart: unless-stopped
+
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: bufferiq-backend
+    environment:
+      ENVIRONMENT: development
+      DEBUG: "true"
+      DATABASE_URL: postgresql://bufferiq:bufferiq_dev_password@postgres:5432/bufferiq
+      REDIS_URL: redis://redis:6379/0
+      BUFFER_API_URL: https://graph.buffer.com/graphql
+      BUFFER_API_KEY: ${BUFFER_API_KEY:-}
+      MODEL_PATH: /app/models
+      LOG_LEVEL: INFO
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_USER: bufferiq
+      POSTGRES_PASSWORD: bufferiq_dev_password
+      POSTGRES_DB: bufferiq
+    volumes:
+      - ./backend:/app
+      - ./scripts:/scripts
+      - backend_models:/app/models
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - bufferiq-network
+    command: sleep infinity
+    restart: unless-stopped
 
 volumes:
   postgres_data:
+    driver: local
   redis_data:
+    driver: local
+  backend_models:
+    driver: local
+
+networks:
+  bufferiq-network:
+    driver: bridge
