@@ -15,8 +15,8 @@ import pytest
 from sqlalchemy import select, text
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession
 
-from backend.bufferiq.core.config import Environment, Settings
-from backend.bufferiq.core.database import (
+from bufferiq.core.config import Environment, Settings
+from bufferiq.core.database import (
     Base,
     DatabaseManager,
     check_database_health,
