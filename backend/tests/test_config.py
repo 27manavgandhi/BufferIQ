@@ -12,8 +12,7 @@ from typing import Any
 import pytest
 from pydantic import ValidationError
 
-from backend.bufferiq.core.config import Environment, Settings, get_settings
-
+from bufferiq.core.config import Environment, Settings, get_settings
 
 class TestSettingsDefaults:
     """Test default values when no environment variables are set."""
