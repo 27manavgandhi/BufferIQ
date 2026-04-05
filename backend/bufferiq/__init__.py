@@ -9,6 +9,6 @@ __version__ = "0.1.0"
 __author__ = "Manav Gandhi"
 __email__ = "27manavgandhi@gmail.com"
 
-from backend.bufferiq.core.config import Settings
+from bufferiq.core.config import Settings
 
 __all__ = ["Settings", "__version__"]
