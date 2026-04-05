@@ -6,16 +6,15 @@ offline (SQL generation) and online (direct execution) modes.
 """
 
 import asyncio
-import os
 from logging.config import fileConfig
 
-from alembic import context
 from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from backend.bufferiq.core.config import Settings
-from backend.bufferiq.core.database import Base
+from alembic import context
+from bufferiq.core.config import Settings
+from bufferiq.core.database import Base
 
 config = context.config
 
