@@ -9,8 +9,12 @@ import sys
 from pathlib import Path
 
 try:
-    from backend.bufferiq.core.config import Settings, get_settings
-    from backend.bufferiq.core.database import get_async_engine, check_database_health
+    import sys
+    import os
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'backend'))
+
+    from bufferiq.core.config import Settings, get_settings
+    from bufferiq.core.database import get_async_engine, check_database_health
     import asyncio
 except ImportError as e:
     print(f"❌ Import error: {e}")
