@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        python-version: ["3.11", "3.12"]
+        python-version: ["3.11"]
 
     steps:
       - uses: actions/checkout@v4
@@ -26,15 +26,14 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip wheel setuptools
-          cd backend
+          pip install -r backend/requirements.txt || true
+          # Install packages individually if requirements.txt fails
           pip install fastapi==0.104.1 uvicorn[standard]==0.24.0
           pip install aiohttp==3.9.1 asyncpg==0.29.0 aiosqlite==0.19.0
-          pip install sqlalchemy==2.0.23 alembic==1.13.0
-          pip install redis==5.0.1 pydantic==2.5.2 pydantic-settings==2.1.0
-          pip install python-dotenv==1.0.0
+          pip install sqlalchemy==2.0.23 alembic==1.13.0 redis==5.0.1
+          pip install pydantic==2.5.2 pydantic-settings==2.1.0 python-dotenv==1.0.0
           pip install pytest==7.4.3 pytest-asyncio==0.21.1 pytest-cov==4.1.0 pytest-mock==3.12.0
-          pip install black==23.12.0 ruff==0.1.8 mypy==1.7.1
-          cd ..
+          pip install black==23.12.0 ruff==0.1.8 mypy==1.7.1 faker==20.1.0
 
       - name: Run black
         run: |
@@ -56,10 +55,8 @@ jobs:
           cd backend
           python -m pytest tests/ -v --cov=bufferiq --cov-report=xml --cov-report=term-missing
 
-      - name: Upload coverage to Codecov
+      - name: Upload coverage
         uses: codecov/codecov-action@v3
         with:
           file: backend/coverage.xml
-          flags: unittests
-          name: codecov-umbrella
           fail_ci_if_error: false

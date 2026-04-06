@@ -1,4 +1,4 @@
-.PHONY: help setup install test lint format type-check clean run docker-build docker-up docker-down docker-test docker-logs db-migrate db-upgrade db-downgrade db-init validate
+.PHONY: help setup install test lint format type-check clean run docker-build docker-up docker-down docker-test docker-logs db-migrate db-upgrade db-downgrade db-reset db-init validate migration
 
 help:
 	@echo "BufferIQ Development Commands"
@@ -23,9 +23,11 @@ help:
 	@echo "  docker-logs    - View service logs"
 	@echo ""
 	@echo "Database:"
-	@echo "  db-migrate     - Create new migration"
+	@echo "  migration      - Create new migration (use msg='message')"
+	@echo "  db-migrate     - Alias for migration"
 	@echo "  db-upgrade     - Apply migrations"
 	@echo "  db-downgrade   - Rollback last migration"
+	@echo "  db-reset       - Reset database (down to base, up to head)"
 	@echo "  db-init        - Initialize database"
 	@echo ""
 	@echo "Utilities:"
@@ -43,19 +45,19 @@ install:
 	pip install -r backend/requirements.txt
 
 test:
-	cd backend && pytest tests/ -v --cov=bufferiq --cov-report=term-missing --cov-report=html
+	cd backend && python -m pytest tests/ -v --cov=bufferiq --cov-report=term-missing --cov-report=html
 
 lint:
-	black backend/ --check
-	ruff backend/
-	mypy backend/bufferiq/ --strict
+	cd backend && python -m black . --check
+	cd backend && python -m ruff .
+	cd backend && python -m mypy bufferiq/ --strict
 
 format:
-	black backend/
-	ruff backend/ --fix
+	cd backend && python -m black .
+	cd backend && python -m ruff . --fix
 
 type-check:
-	mypy backend/bufferiq/ --strict
+	cd backend && python -m mypy bufferiq/ --strict
 
 validate: lint test
 	@echo "✅ All validation checks passed!"
@@ -90,16 +92,22 @@ docker-logs:
 	docker-compose logs -f
 
 docker-test:
-	docker-compose exec backend pytest tests/ -v --cov=bufferiq --cov-report=term-missing
+	docker-compose exec backend python -m pytest tests/ -v --cov=bufferiq --cov-report=term-missing
 
-db-migrate:
-	cd backend && alembic revision --autogenerate -m "$(message)"
+migration:
+	cd backend && alembic revision --autogenerate -m "$(msg)"
+
+db-migrate: migration
 
 db-upgrade:
 	cd backend && alembic upgrade head
 
 db-downgrade:
 	cd backend && alembic downgrade -1
+
+db-reset:
+	cd backend && alembic downgrade base
+	cd backend && alembic upgrade head
 
 db-init:
 	docker-compose exec backend bash /scripts/init-db.sh
