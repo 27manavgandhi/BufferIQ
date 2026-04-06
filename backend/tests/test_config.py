@@ -69,12 +69,17 @@ class TestSettingsDefaults:
 class TestSettingsFromEnvironment:
     """Test settings loaded from environment variables."""
 
-    def test_environment_from_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
-        """Environment should load from ENVIRONMENT variable."""
-        monkeypatch.setenv("ENVIRONMENT", "production")
-        settings = Settings()
-        assert settings.environment == Environment.PRODUCTION
-        assert settings.is_production is True
+
+    # In backend/tests/test_config.py
+# Find the test_environment_from_env method and update it:
+
+def test_environment_from_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
+    """Environment should load from ENVIRONMENT variable."""
+    monkeypatch.setenv("ENVIRONMENT", "production")
+    monkeypatch.setenv("BUFFER_API_KEY", "test_key_for_production")  # Add this line
+    settings = Settings()
+    assert settings.environment == Environment.PRODUCTION
+    assert settings.is_production is True    
 
     def test_debug_from_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Debug flag should load from DEBUG variable."""
