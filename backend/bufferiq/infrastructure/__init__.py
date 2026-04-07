@@ -1,3 +1,9 @@
-"""Infrastructure layer for database, cache, and external services."""
+"""
+Infrastructure layer.
 
-__all__: list[str] = []
+Implements external service integrations and technical concerns.
+"""
+
+from bufferiq.infrastructure.buffer_client import BufferClient
+
+__all__ = ["BufferClient"]
