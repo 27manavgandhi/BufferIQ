@@ -18,6 +18,27 @@ BufferIQ is a production-grade, ML-powered intelligence platform built on top of
 - **Continuous Learning**: Self-improving models that get better with every post
 
 ## 🚀 Quick Start
+
+### Using Docker (Recommended)
+```powershell
+# Clone repository
+git clone https://github.com/27manavgandhi/BufferIQ.git
+cd BufferIQ
+
+# Start all services
+docker-compose up -d
+
+# Check service health
+docker-compose ps
+
+# Run tests
+docker-compose exec backend pytest tests/ -v
+
+# View logs
+docker-compose logs -f backend
+```
+
+### Local Development
 ```powershell
 # Clone repository
 git clone https://github.com/27manavgandhi/BufferIQ.git
@@ -34,20 +55,21 @@ pytest tests/ -v --cov=bufferiq
 
 # Start development
 cd ..
-docker-compose up -d
+make run
 ```
 
 ## 📋 Prerequisites
 
-- Python 3.11+
-- Node.js 20 LTS+ (for MCP server)
-- Docker & Docker Compose
-- Git 2.40+
+- **Docker & Docker Compose** (recommended for development)
+- **Python 3.11+** (for local development)
+- **Node.js 20 LTS+** (for MCP server)
+- **Git 2.40+**
 
 ## 🏗️ Architecture
 
 BufferIQ follows a strict layered architecture with clear separation of concerns:
 
+```text
 ┌─────────────────────────────────────────┐
 │     Presentation Layer (MCP Server)     │
 │          TypeScript/Node.js             │
@@ -67,7 +89,7 @@ BufferIQ follows a strict layered architecture with clear separation of concerns
 │    Infrastructure Layer (Data)          │
 │  PostgreSQL, Redis, File System         │
 └─────────────────────────────────────────┘
-
+```
 See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed system design.
 
 ## 🛠️ Technology Stack
@@ -75,10 +97,16 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed system design.
 **Backend (Python 3.11+)**
 - FastAPI 0.104+ (async web framework)
 - SQLAlchemy 2.0+ (ORM with async support)
+- Alembic 1.13+ (database migrations)
+- PostgreSQL 15+ / SQLite (database)
+- Redis 7.0+ (caching)
 - XGBoost 2.0+ / LightGBM 4.0+ (ML models)
 - spaCy 3.7+ / sentence-transformers 2.2+ (NLP)
-- Redis 7.0+ (caching)
-- PostgreSQL 15+ (database)
+
+**Infrastructure**
+- Docker & Docker Compose
+- PostgreSQL 15 (production database)
+- Redis 7 (caching layer)
 
 **MCP Server (TypeScript/Node.js)**
 - Node.js 20 LTS+
@@ -95,18 +123,23 @@ See [ARCHITECTURE.md](docs/ARCHITECTURE.md) for detailed system design.
 
 ## 📊 Project Status
 
-**Current Phase**: Day 1 - Foundation & Architecture
-**Progress**: 1/60 days (1.7%)
-**Next Milestone**: Day 7 - Exploratory Data Analysis
+**Current Phase**: Day 2 - Development Environment Setup
+**Progress**: 2/60 days (3.3%)
+**Next Milestone**: Day 3 - Database Schema & Models
+
+### Completed
+- ✅ Day 1: Foundation & Architecture
+- ✅ Day 2: Development Environment & Database Setup
 
 ## 🧪 Testing
 ```powershell
 # Run all tests with coverage
 cd backend
-pytest tests/ -v --cov=bufferiq --cov-report=term-missing
+pytest tests/ -v --cov=bufferiq --cov-report=term-missing --cov-report=html
 
 # Run specific test file
 pytest tests/test_config.py -v
+pytest tests/test_database.py -v
 
 # Type checking
 mypy bufferiq/ --strict
@@ -116,9 +149,25 @@ ruff bufferiq/
 black bufferiq/ --check
 ```
 
+## 🗄️ Database
+
+### Migrations
+```powershell
+# Create migration
+make db-migrate message="add user table"
+
+# Apply migrations
+make db-upgrade
+
+# Rollback migration
+make db-downgrade
+```
+
+See [DATABASE.md](docs/DATABASE.md) for complete database documentation.
+
 ## 📈 Quality Standards
 
-- **Test Coverage**: 80%+ (currently 100% on config)
+- **Test Coverage**: 80%+ (currently 100% on config & database)
 - **Type Safety**: 100% type hints (mypy --strict)
 - **Code Style**: black + ruff (zero warnings)
 - **Performance**: < 500ms API response time (p95)
@@ -131,6 +180,14 @@ black bufferiq/ --check
 3. **Fail-Safe**: Graceful degradation, comprehensive error handling
 4. **Async-Native**: Non-blocking I/O for all network operations
 5. **Observable**: Structured logging, metrics, health checks
+
+## 🐳 Docker Services
+
+- **postgres**: PostgreSQL 15 database
+- **redis**: Redis 7 cache
+- **backend**: Python application
+
+All services include health checks and automatic restart policies.
 
 ## 🤝 Contributing
 
@@ -151,6 +208,7 @@ Built during a 60-day build-in-public journey to demonstrate senior-level engine
 - **Documentation**: [docs/](docs/)
 - **Setup Guide**: [docs/SETUP.md](docs/SETUP.md)
 - **Architecture**: [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
+- **Database**: [docs/DATABASE.md](docs/DATABASE.md)
 - **Issues**: [GitHub Issues](https://github.com/27manavgandhi/BufferIQ/issues)
 
 ---
