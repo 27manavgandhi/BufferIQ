@@ -11,7 +11,8 @@ from pathlib import Path
 try:
     import sys
     import os
-    sys.path.insert(0, os.path.join(os.path.dirname(__file__), '..', 'backend'))
+
+    sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "backend"))
 
     from bufferiq.core.config import Settings, get_settings
     from bufferiq.core.database import get_async_engine, check_database_health
@@ -27,11 +28,11 @@ async def validate_database() -> bool:
     try:
         settings = get_settings()
         engine = get_async_engine(settings)
-        
+
         health = await check_database_health(engine)
-        
+
         await engine.dispose()
-        
+
         return health
     except Exception as e:
         print(f"❌ Database validation failed: {e}")
@@ -42,22 +43,24 @@ def validate_environment() -> bool:
     """Validate environment configuration."""
     try:
         settings = get_settings()
-        
+
         print("✅ Configuration loaded successfully")
         print(f"   Environment: {settings.environment.value}")
         print(f"   Debug: {settings.debug}")
-        print(f"   Database: {settings.database_url.split('@')[-1] if '@' in settings.database_url else settings.database_url}")
+        print(
+            f"   Database: {settings.database_url.split('@')[-1] if '@' in settings.database_url else settings.database_url}"
+        )
         print(f"   Redis: {settings.redis_url}")
         print(f"   Model path: {settings.model_path}")
-        
+
         if not settings.model_path.exists():
             print(f"⚠️  Model path does not exist: {settings.model_path}")
             return False
-        
+
         if settings.is_production and not settings.buffer_api_key:
             print("❌ BUFFER_API_KEY required in production")
             return False
-        
+
         return True
     except Exception as e:
         print(f"❌ Configuration validation failed: {e}")
@@ -68,24 +71,24 @@ async def main() -> None:
     """Run all validations."""
     print("BufferIQ Environment Validation")
     print("=" * 50)
-    
+
     # Validate environment
     env_ok = validate_environment()
-    
+
     if not env_ok:
         print("\n❌ Environment validation failed")
         sys.exit(1)
-    
+
     # Validate database
     print("\nValidating database connection...")
     db_ok = await validate_database()
-    
+
     if db_ok:
         print("✅ Database connection OK")
     else:
         print("❌ Database connection failed")
         sys.exit(1)
-    
+
     print("\n" + "=" * 50)
     print("✅ All validations passed!")
     print("BufferIQ is ready to run")

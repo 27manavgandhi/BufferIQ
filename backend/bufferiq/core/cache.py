@@ -3,7 +3,7 @@ Response cache with Redis backend and TTL support.
 """
 
 import json
-from typing import Any
+from typing import Any, cast
 
 from redis.asyncio import Redis
 
@@ -55,12 +55,17 @@ class ResponseCache:
             Cached response or None
         """
         key = self._get_key(query, variables)
-        data = await self.redis.get(key)
+        data_bytes = await self.redis.get(key)
 
-        if data is None:
+        if data_bytes is None:
             return None
 
-        return json.loads(data)
+        data_str = (
+            data_bytes if isinstance(data_bytes, str) else data_bytes.decode("utf-8")
+        )
+
+        # 🔥 FIX: cast result of json.loads
+        return cast(dict[str, Any], json.loads(data_str))
 
     async def set(
         self,

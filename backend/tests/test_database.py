@@ -167,7 +167,9 @@ class TestSessionManagement:
 
         async with get_session(sessionmaker) as session:
             result = await session.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table' AND name='test_table'")
+                text(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='test_table'"
+                )
             )
             assert result.scalar() == "test_table"
 
@@ -187,7 +189,9 @@ class TestSessionManagement:
 
         async with get_session(sessionmaker) as session:
             result = await session.execute(
-                text("SELECT name FROM sqlite_master WHERE type='table' AND name='test_table'")
+                text(
+                    "SELECT name FROM sqlite_master WHERE type='table' AND name='test_table'"
+                )
             )
             assert result.scalar() is None
 
@@ -284,9 +288,7 @@ class TestDatabaseManager:
         await manager.disconnect()
 
     @pytest.mark.asyncio
-    async def test_manager_disconnects_cleanly(
-        self, sqlite_settings: Settings
-    ) -> None:
+    async def test_manager_disconnects_cleanly(self, sqlite_settings: Settings) -> None:
         """DatabaseManager should disconnect cleanly."""
         manager = DatabaseManager(sqlite_settings)
         await manager.connect()
@@ -297,7 +299,9 @@ class TestDatabaseManager:
         assert manager.sessionmaker is None
 
     @pytest.mark.asyncio
-    async def test_manager_session_context_manager(self, db_manager: DatabaseManager) -> None:
+    async def test_manager_session_context_manager(
+        self, db_manager: DatabaseManager
+    ) -> None:
         """DatabaseManager session should work as context manager."""
         async with db_manager.session() as session:
             assert isinstance(session, AsyncSession)

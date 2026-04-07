@@ -222,12 +222,8 @@ class Post(Base, TimestampMixin):
     status: Mapped[str] = mapped_column(
         String(50), index=True, default="draft", nullable=False
     )
-    scheduled_at: Mapped[Optional[datetime]] = mapped_column(
-        index=True, nullable=True
-    )
-    published_at: Mapped[Optional[datetime]] = mapped_column(
-        index=True, nullable=True
-    )
+    scheduled_at: Mapped[Optional[datetime]] = mapped_column(index=True, nullable=True)
+    published_at: Mapped[Optional[datetime]] = mapped_column(index=True, nullable=True)
     likes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     comments: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     shares: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
@@ -278,7 +274,9 @@ class Post(Base, TimestampMixin):
         return value.strip()
 
     @validates("engagement_rate")
-    def validate_engagement_rate(self, key: str, value: Optional[float]) -> Optional[float]:
+    def validate_engagement_rate(
+        self, key: str, value: Optional[float]
+    ) -> Optional[float]:
         """Validate engagement rate is between 0 and 1."""
         if value is not None and (value < 0 or value > 1):
             raise ValueError(f"Engagement rate must be between 0 and 1, got {value}")
@@ -332,10 +330,16 @@ class Prediction(Base, TimestampMixin):
 
     __table_args__ = (
         Index("idx_prediction_post_model", "post_id", "model_version_id"),
-        CheckConstraint("confidence >= 0 AND confidence <= 1", name="check_confidence_range"),
+        CheckConstraint(
+            "confidence >= 0 AND confidence <= 1", name="check_confidence_range"
+        ),
         CheckConstraint("predicted_likes >= 0", name="check_predicted_likes_positive"),
-        CheckConstraint("predicted_comments >= 0", name="check_predicted_comments_positive"),
-        CheckConstraint("predicted_shares >= 0", name="check_predicted_shares_positive"),
+        CheckConstraint(
+            "predicted_comments >= 0", name="check_predicted_comments_positive"
+        ),
+        CheckConstraint(
+            "predicted_shares >= 0", name="check_predicted_shares_positive"
+        ),
     )
 
     @validates("confidence")
@@ -373,9 +377,7 @@ class ModelVersion(Base, TimestampMixin):
     model_path: Mapped[str] = mapped_column(String(500), nullable=False)
     feature_names: Mapped[str] = mapped_column(Text, nullable=False)
     hyperparameters: Mapped[str] = mapped_column(Text, nullable=False)
-    is_active: Mapped[bool] = mapped_column(
-        default=False, index=True, nullable=False
-    )
+    is_active: Mapped[bool] = mapped_column(default=False, index=True, nullable=False)
     training_data_size: Mapped[int] = mapped_column(Integer, nullable=False)
     training_data_date_range: Mapped[str] = mapped_column(String(100), nullable=False)
     trained_at: Mapped[datetime] = mapped_column(
@@ -400,9 +402,7 @@ class ModelVersion(Base, TimestampMixin):
         """Validate version format (e.g., 1.0.0)."""
         parts = value.split(".")
         if len(parts) != 3 or not all(part.isdigit() for part in parts):
-            raise ValueError(
-                f"Invalid version format: {value}. Expected format: X.Y.Z"
-            )
+            raise ValueError(f"Invalid version format: {value}. Expected format: X.Y.Z")
         return value
 
     def __repr__(self) -> str:
@@ -462,7 +462,12 @@ class VoiceProfile(Base, TimestampMixin):
         CheckConstraint("posts_analyzed > 0", name="check_posts_analyzed_positive"),
     )
 
-    @validates("formality_score", "emoji_usage_rate", "hashtag_usage_rate", "question_usage_rate")
+    @validates(
+        "formality_score",
+        "emoji_usage_rate",
+        "hashtag_usage_rate",
+        "question_usage_rate",
+    )
     def validate_rate(self, key: str, value: float) -> float:
         """Validate rate is between 0 and 1."""
         if value < 0 or value > 1:
@@ -470,7 +475,9 @@ class VoiceProfile(Base, TimestampMixin):
         return value
 
     def __repr__(self) -> str:
-        return f"<VoiceProfile(id={self.id}, user_id={self.user_id}, tone='{self.tone}')>"
+        return (
+            f"<VoiceProfile(id={self.id}, user_id={self.user_id}, tone='{self.tone}')>"
+        )
 
 
 class ContentGap(Base, TimestampMixin):
@@ -528,7 +535,9 @@ class ContentGap(Base, TimestampMixin):
         return value
 
     def __repr__(self) -> str:
-        return f"<ContentGap(id={self.id}, topic='{self.topic}', type='{self.gap_type}')>"
+        return (
+            f"<ContentGap(id={self.id}, topic='{self.topic}', type='{self.gap_type}')>"
+        )
 
 
 class SyncJob(Base, TimestampMixin):
@@ -598,4 +607,6 @@ class SyncJob(Base, TimestampMixin):
         return successful / self.processed_items
 
     def __repr__(self) -> str:
-        return f"<SyncJob(id={self.id}, type='{self.job_type}', status='{self.status}')>"
+        return (
+            f"<SyncJob(id={self.id}, type='{self.job_type}', status='{self.status}')>"
+        )

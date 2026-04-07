@@ -14,6 +14,7 @@ from pydantic import ValidationError
 
 from bufferiq.core.config import Environment, Settings, get_settings
 
+
 class TestSettingsDefaults:
     """Test default values when no environment variables are set."""
 
@@ -69,9 +70,11 @@ class TestSettingsDefaults:
 class TestSettingsFromEnvironment:
     """Test settings loaded from environment variables."""
 
-
     # In backend/tests/test_config.py
+
+
 # Find the test_environment_from_env method and update it:
+
 
 def test_environment_from_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
     """Environment should load from ENVIRONMENT variable."""
@@ -79,7 +82,7 @@ def test_environment_from_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
     monkeypatch.setenv("BUFFER_API_KEY", "test_key_for_production")  # Add this line
     settings = Settings()
     assert settings.environment == Environment.PRODUCTION
-    assert settings.is_production is True    
+    assert settings.is_production is True
 
     def test_debug_from_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Debug flag should load from DEBUG variable."""

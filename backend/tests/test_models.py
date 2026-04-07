@@ -76,7 +76,9 @@ class TestUserModel:
     async def test_user_empty_token(self, test_session: AsyncSession) -> None:
         """Test user access token validation."""
         with pytest.raises(ValueError, match="Access token cannot be empty"):
-            User(buffer_org_id="org_test", buffer_access_token="", email="test@test.com")
+            User(
+                buffer_org_id="org_test", buffer_access_token="", email="test@test.com"
+            )
 
     @pytest.mark.asyncio
     async def test_user_cascade_delete(
@@ -573,6 +575,4 @@ class TestSyncJobModel:
     ) -> None:
         """Test sync job type validation."""
         with pytest.raises(ValueError, match="Invalid job type"):
-            SyncJob(
-                user_id=sample_user.id, job_type="invalid_type", status="pending"
-            )
+            SyncJob(user_id=sample_user.id, job_type="invalid_type", status="pending")
