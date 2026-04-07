@@ -1,4 +1,4 @@
-from typing import Any, AsyncGenerator, Optional
+from typing import AsyncGenerator, Optional
 
 from sqlalchemy import text
 from sqlalchemy.ext.asyncio import (
@@ -53,7 +53,7 @@ def get_sessionmaker(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
     )
 
 
-# ---------------- SESSION CONTEXT ---------------- #
+# ---------------- SESSION ---------------- #
 
 
 async def get_session(
@@ -104,7 +104,7 @@ class DatabaseManager:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
         self.engine: Optional[AsyncEngine] = None
-        self.sessionmaker: Optional[async_sessionmaker] = None
+        self.sessionmaker: Optional[async_sessionmaker[AsyncSession]] = None
         self._connected = False
 
     async def connect(self) -> None:
@@ -127,11 +127,12 @@ class DatabaseManager:
         if not self._connected or not self.sessionmaker:
             raise RuntimeError("Database not connected")
 
-        async with get_session(self.sessionmaker) as session:
+        async for session in get_session(self.sessionmaker):
             yield session
 
 
 # ---------------- GLOBAL MANAGER ---------------- #
+
 
 _db_manager: Optional[DatabaseManager] = None
 
