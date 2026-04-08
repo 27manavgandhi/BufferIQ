@@ -5,7 +5,7 @@ Provides reusable fixtures for testing database models and Buffer API client.
 """
 
 import asyncio
-from typing import AsyncGenerator, Generator
+from collections.abc import AsyncGenerator, Generator
 
 import pytest
 import pytest_asyncio
@@ -23,7 +23,6 @@ from bufferiq.core.database import (
 from bufferiq.domain.models import Channel, Organization, Post, User
 from bufferiq.infrastructure.buffer.buffer_client import BufferClient
 from bufferiq.infrastructure.buffer.rate_limiter import RateLimiter
-
 
 # ============================================================================
 # Event Loop & Settings

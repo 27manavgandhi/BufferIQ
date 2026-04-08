@@ -40,17 +40,17 @@ class Settings(BaseSettings):
     debug: bool = True
 
     # Database
-    database_url: str = "sqlite:///:memory:"
+    database_url: str = "sqlite:///./bufferiq.db"
 
     # Buffer API
-    buffer_api_url: str = "https://api.buffer.com/graphql"
+    buffer_api_url: str = "https://graph.buffer.com/graphql"
     buffer_api_key: str = ""
 
     # Redis
-    redis_url: str = "redis://localhost:6379"
+    redis_url: str = "redis://localhost:6379/0"
 
     # ML Models
-    model_path: Path = Path("models")
+    model_path: Path = Path("./models")
 
     # Logging
     log_level: str = "INFO"
@@ -93,7 +93,6 @@ class Settings(BaseSettings):
     @classmethod
     def validate_buffer_api_key(cls, v: str, info: Any) -> str:
         """Validate Buffer API key is set in production."""
-        # Get environment from values dict
         values = info.data
         environment = values.get("environment", Environment.DEVELOPMENT)
 
@@ -106,11 +105,11 @@ class Settings(BaseSettings):
     )
     @classmethod
     def validate_rate_limits(cls, v: int) -> int:
-        """Validate rate limits are positive."""
+        """Validate rate limits are within acceptable range."""
         if v < 1:
-            raise ValueError("Rate limits must be positive integers")
-        if v > 1_000_000:
-            raise ValueError("Rate limits cannot exceed 1,000,000")
+            raise ValueError("Rate limits must be greater than or equal to 1")
+        if v > 1000:
+            raise ValueError("Rate limits must be less than or equal to 1000")
         return v
 
     @field_validator("model_path", mode="before")
@@ -143,9 +142,22 @@ class Settings(BaseSettings):
         """Enable SQLAlchemy query logging in development with debug enabled."""
         return self.is_development and self.debug
 
+    @property
+    def database_is_sqlite(self) -> bool:
+        """Check if using SQLite database."""
+        return self.database_url.startswith("sqlite://")
+
+    @property
+    def database_is_postgresql(self) -> bool:
+        """Check if using PostgreSQL database."""
+        return self.database_url.startswith("postgresql://")
+
+    def get_database_echo(self) -> bool:
+        """Get database echo setting (method form for tests)."""
+        return self.database_echo
+
     def model_post_init(self, __context: Any) -> None:
         """Run after model initialization."""
-        # Ensure model path exists
         self.model_path.mkdir(parents=True, exist_ok=True)
 
 

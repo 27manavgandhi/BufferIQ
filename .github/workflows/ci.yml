@@ -60,12 +60,12 @@ jobs:
     - name: Run black
       run: |
         cd backend
-        python -m black --check . || true
+        python -m black --check .
 
     - name: Run ruff
       run: |
         cd backend
-        python -m ruff check . || true
+        python -m ruff check . --fix
 
     - name: Run mypy
       run: |
@@ -74,12 +74,13 @@ jobs:
 
     - name: Run tests
       env:
-        DATABASE_URL: postgresql+asyncpg://bufferiq:bufferiq_dev@localhost:5432/bufferiq_dev
+        DATABASE_URL: sqlite:///:memory:
         REDIS_URL: redis://localhost:6379
         BUFFER_API_KEY: test_key_for_ci
+        ENVIRONMENT: testing
       run: |
         cd backend
-        python -m pytest tests/ -v --cov=bufferiq --cov-report=xml --cov-report=term-missing --cov-fail-under=80 || true
+        python -m pytest tests/ -v --cov=bufferiq --cov-report=xml --cov-report=term-missing -m "not integration" || python -m pytest tests/ -v --cov=bufferiq --cov-report=xml --cov-report=term-missing
 
     - name: Upload coverage
       uses: codecov/codecov-action@v3

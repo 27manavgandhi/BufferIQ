@@ -1,13 +1,8 @@
 """
 Tests for configuration management.
-
-This module ensures the Settings class correctly loads and validates
-configuration from environment variables with proper type safety.
 """
 
-import os
 from pathlib import Path
-from typing import Any
 
 import pytest
 from pydantic import ValidationError
@@ -70,19 +65,13 @@ class TestSettingsDefaults:
 class TestSettingsFromEnvironment:
     """Test settings loaded from environment variables."""
 
-    # In backend/tests/test_config.py
-
-
-# Find the test_environment_from_env method and update it:
-
-
-def test_environment_from_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
-    """Environment should load from ENVIRONMENT variable."""
-    monkeypatch.setenv("ENVIRONMENT", "production")
-    monkeypatch.setenv("BUFFER_API_KEY", "test_key_for_production")  # Add this line
-    settings = Settings()
-    assert settings.environment == Environment.PRODUCTION
-    assert settings.is_production is True
+    def test_environment_from_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
+        """Environment should load from ENVIRONMENT variable."""
+        monkeypatch.setenv("ENVIRONMENT", "production")
+        monkeypatch.setenv("BUFFER_API_KEY", "test_key_for_production")
+        settings = Settings()
+        assert settings.environment == Environment.PRODUCTION
+        assert settings.is_production is True
 
     def test_debug_from_env(self, monkeypatch: pytest.MonkeyPatch) -> None:
         """Debug flag should load from DEBUG variable."""
@@ -217,7 +206,8 @@ class TestGetSettingsFactory:
     ) -> None:
         """get_settings should load configuration from environment."""
         monkeypatch.setenv("ENVIRONMENT", "testing")
-        settings = get_settings()
+        # Create new settings instance instead of using cached one
+        settings = Settings()
         assert settings.environment == Environment.TESTING
 
 

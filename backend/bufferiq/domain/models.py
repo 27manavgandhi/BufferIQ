@@ -15,8 +15,7 @@ Models:
 
 from datetime import datetime
 from enum import Enum
-from typing import List, Optional
-from sqlalchemy import func
+from typing import Optional
 
 from sqlalchemy import (
     CheckConstraint,
@@ -26,7 +25,7 @@ from sqlalchemy import (
     Integer,
     String,
     Text,
-    text,
+    func,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship, validates
 
@@ -87,19 +86,19 @@ class User(Base, TimestampMixin):
     last_sync_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
 
-    organizations: Mapped[List["Organization"]] = relationship(
+    organizations: Mapped[list["Organization"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
-    model_versions: Mapped[List["ModelVersion"]] = relationship(
+    model_versions: Mapped[list["ModelVersion"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
     voice_profile: Mapped[Optional["VoiceProfile"]] = relationship(
         back_populates="user", cascade="all, delete-orphan", uselist=False
     )
-    content_gaps: Mapped[List["ContentGap"]] = relationship(
+    content_gaps: Mapped[list["ContentGap"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
-    sync_jobs: Mapped[List["SyncJob"]] = relationship(
+    sync_jobs: Mapped[list["SyncJob"]] = relationship(
         back_populates="user", cascade="all, delete-orphan"
     )
 
@@ -139,7 +138,7 @@ class Organization(Base, TimestampMixin):
     name: Mapped[str] = mapped_column(String(255), nullable=False)
 
     user: Mapped["User"] = relationship(back_populates="organizations")
-    channels: Mapped[List["Channel"]] = relationship(
+    channels: Mapped[list["Channel"]] = relationship(
         back_populates="organization", cascade="all, delete-orphan"
     )
 
@@ -169,7 +168,7 @@ class Channel(Base, TimestampMixin):
     is_active: Mapped[bool] = mapped_column(default=True, nullable=False)
 
     organization: Mapped["Organization"] = relationship(back_populates="channels")
-    posts: Mapped[List["Post"]] = relationship(
+    posts: Mapped[list["Post"]] = relationship(
         back_populates="channel", cascade="all, delete-orphan"
     )
 
@@ -233,7 +232,7 @@ class Post(Base, TimestampMixin):
     last_synced_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
 
     channel: Mapped["Channel"] = relationship(back_populates="posts")
-    predictions: Mapped[List["Prediction"]] = relationship(
+    predictions: Mapped[list["Prediction"]] = relationship(
         back_populates="post", cascade="all, delete-orphan"
     )
 
@@ -387,7 +386,7 @@ class ModelVersion(Base, TimestampMixin):
     retired_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
 
     user: Mapped["User"] = relationship(back_populates="model_versions")
-    predictions: Mapped[List["Prediction"]] = relationship(
+    predictions: Mapped[list["Prediction"]] = relationship(
         back_populates="model_version"
     )
 

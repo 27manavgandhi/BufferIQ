@@ -7,8 +7,8 @@ from aiohttp import ClientError
 from redis.asyncio import Redis
 
 from bufferiq.core.config import Settings
-from bufferiq.infrastructure.buffer.cache import ResponseCache
 from bufferiq.infrastructure.buffer.buffer_client import BufferClient
+from bufferiq.infrastructure.buffer.cache import ResponseCache
 from bufferiq.infrastructure.buffer.exceptions import (
     BufferAPIError,
     BufferAuthenticationError,
