@@ -145,10 +145,10 @@ class TestSessionManagement:
         """Session should rollback transaction on exception."""
         sessionmaker = get_sessionmaker(initialized_sqlite_engine)
 
-        with pytest.raises(Exception):
+        with pytest.raises(RuntimeError):
             async for session in get_session(sessionmaker):
                 await session.execute(text("CREATE TABLE test_table (id INTEGER)"))
-                raise Exception("Simulated error")
+                raise RuntimeError("Simulated error")
 
         async for session in get_session(sessionmaker):
             result = await session.execute(
@@ -263,7 +263,7 @@ class TestDatabaseManager:
         """Using session without connection should raise RuntimeError."""
         manager = DatabaseManager(sqlite_settings)
         with pytest.raises(RuntimeError, match="not connected"):
-            async for session in manager.session():
+            async for _ in manager.session():
                 pass
 
 

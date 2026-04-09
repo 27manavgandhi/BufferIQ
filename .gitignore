@@ -1,15 +1,16 @@
+# =========================
 # Python
+# =========================
 __pycache__/
 *.py[cod]
 *$py.class
 *.so
 .Python
-venv/
-env/
-ENV/
+
+# Build / Packaging
 build/
-develop-eggs/
 dist/
+develop-eggs/
 downloads/
 eggs/
 .eggs/
@@ -23,59 +24,107 @@ wheels/
 .installed.cfg
 *.egg
 
-# Virtual environments
+# =========================
+# Virtual Environments
+# =========================
 venv/
-ENV/
 env/
-.venv
+ENV/
+.venv/
 
-# IDE
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.local
+.env.*.local
+
+# =========================
+# Database
+# =========================
+*.db
+*.sqlite
+*.sqlite3
+*.db-journal
+bufferiq.db
+
+# =========================
+# Logs
+# =========================
+*.log
+logs/
+
+# =========================
+# Testing
+# =========================
+.pytest_cache/
+.coverage
+.coverage.*
+htmlcov/
+.tox/
+.hypothesis/
+
+# =========================
+# Type Checking / Lint
+# =========================
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.ruff_cache/
+
+# =========================
+# Jupyter
+# =========================
+.ipynb_checkpoints/
+*.ipynb_checkpoints
+
+# =========================
+# IDE / Editor
+# =========================
 .vscode/
 .idea/
 *.swp
 *.swo
 *~
+
+# =========================
+# OS Files
+# =========================
 .DS_Store
+Thumbs.db
 
-# Testing
-.pytest_cache/
-.coverage
-htmlcov/
-.tox/
-.hypothesis/
+# =========================
+# Alembic
+# =========================
+alembic/versions/*.pyc
 
-# Type checking
-.mypy_cache/
-.dmypy.json
-dmypy.json
-
-# Database
-*.db
-*.sqlite
-*.sqlite3
-
-# Environment variables
-.env
-.env.local
-.env.*.local
-
-# Models
+# =========================
+# ML / Models (if used)
+# =========================
 models/*.pkl
 models/*.joblib
 models/*.h5
 
-# Logs
-*.log
-logs/
+# =========================
+# Project Outputs (be careful)
+# =========================
+outputs/
 
-# Documentation builds
-docs/_build/
-site/
+# =========================
+# Coverage & Reports
+# =========================
+coverage.xml
+*.cover
 
-# OS
-Thumbs.db
-.DS_Store
+# =========================
+# FastAPI / Uvicorn
+# =========================
+*.pid
+*.sock
 
-# Project specific
-bufferiq.db
-*.db-journal
+# =========================
+# Misc
+# =========================
+*.bak
+*.tmp
+*.temp

@@ -58,7 +58,7 @@ class Settings(BaseSettings):
     # Rate Limits (per user)
     max_requests_per_15min: int = 100
     max_requests_per_24hours: int = 500
-    max_requests_per_30days: int = 10000
+    max_requests_per_30days: int = 999
 
     @field_validator("environment", mode="before")
     @classmethod
@@ -69,10 +69,10 @@ class Settings(BaseSettings):
         if isinstance(v, str):
             try:
                 return Environment(v.lower())
-            except ValueError:
+            except ValueError as err:
                 raise ValueError(
                     f"Invalid environment: {v}. Must be one of: development, testing, production"
-                )
+                ) from err
         raise ValueError(f"Invalid environment type: {type(v)}")
 
     @field_validator("log_level", mode="before")

@@ -223,6 +223,7 @@ class Post(Base, TimestampMixin):
     )
     scheduled_at: Mapped[Optional[datetime]] = mapped_column(index=True, nullable=True)
     published_at: Mapped[Optional[datetime]] = mapped_column(index=True, nullable=True)
+    sent_at: Mapped[Optional[datetime]] = mapped_column(nullable=True)
     likes: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     comments: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
     shares: Mapped[Optional[int]] = mapped_column(Integer, nullable=True)
@@ -551,7 +552,7 @@ class SyncJob(Base, TimestampMixin):
     user_id: Mapped[int] = mapped_column(
         ForeignKey("users.id", ondelete="CASCADE"), index=True, nullable=False
     )
-    job_type: Mapped[str] = mapped_column(String(50), nullable=False)
+    sync_type: Mapped[str] = mapped_column(String(50), nullable=False)
     status: Mapped[str] = mapped_column(
         String(50), index=True, default="pending", nullable=False
     )
@@ -569,7 +570,7 @@ class SyncJob(Base, TimestampMixin):
     __table_args__ = (
         Index("idx_sync_user_status", "user_id", "status"),
         CheckConstraint(
-            "job_type IN ('initial', 'incremental')", name="check_job_type"
+            "sync_type IN ('initial', 'incremental')", name="check_sync_type"
         ),
         CheckConstraint(
             "status IN ('pending', 'running', 'completed', 'failed')",
@@ -589,7 +590,7 @@ class SyncJob(Base, TimestampMixin):
             )
         return value.lower()
 
-    @validates("job_type")
+    @validates("sync_type")
     def validate_job_type(self, key: str, value: str) -> str:
         """Validate job type."""
         valid_types = {"initial", "incremental"}
@@ -607,5 +608,5 @@ class SyncJob(Base, TimestampMixin):
 
     def __repr__(self) -> str:
         return (
-            f"<SyncJob(id={self.id}, type='{self.job_type}', status='{self.status}')>"
+            f"<SyncJob(id={self.id}, type='{self.sync_type}', status='{self.status}')>"
         )

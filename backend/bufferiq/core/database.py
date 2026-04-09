@@ -4,6 +4,7 @@ Database configuration and session management.
 Provides async SQLAlchemy engine and session factory with connection pooling.
 """
 
+from collections.abc import AsyncGenerator
 from typing import Any
 
 from sqlalchemy import text
@@ -86,7 +87,7 @@ def get_sessionmaker(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
 
 async def get_session(
     sessionmaker: async_sessionmaker[AsyncSession],
-) -> AsyncSession:
+) -> AsyncGenerator[AsyncSession, None]:
     """
     Get database session.
 
@@ -199,7 +200,7 @@ class DatabaseManager:
         self.sessionmaker = None
         self._connected = False
 
-    async def session(self) -> AsyncSession:
+    async def session(self) -> AsyncGenerator[AsyncSession, None]:
         """
         Get database session.
 

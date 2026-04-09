@@ -111,3 +111,20 @@ db-reset:
 
 db-init:
 	docker-compose exec backend bash /scripts/init-db.sh
+
+# Sync commands
+.PHONY: sync-initial
+sync-initial:
+	cd backend && python -m bufferiq.cli.sync initial --user-id=$(USER_ID)
+
+.PHONY: sync-incremental
+sync-incremental:
+	cd backend && python -m bufferiq.cli.sync incremental --user-id=$(USER_ID)
+
+.PHONY: sync-status
+sync-status:
+	cd backend && python -m bufferiq.cli.sync status --user-id=$(USER_ID)
+
+.PHONY: sync-history
+sync-history:
+	cd backend && python -m bufferiq.cli.sync history --user-id=$(USER_ID)
