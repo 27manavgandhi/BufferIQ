@@ -1,129 +1,144 @@
 """
 GraphQL query and mutation definitions for Buffer API.
+
+IMPORTANT: Buffer API uses custom scalar types:
+- OrganizationId! (not ID!)
+- ChannelId! (not ID!)
+- PostId! (not ID!)
 """
 
-# Organizations
+# Organizations (via account)
 GET_ORGANIZATIONS = """
 query GetOrganizations {
+  account {
     organizations {
-        id
-        name
-        createdAt
+      id
+      name
     }
+  }
 }
 """
 
 GET_ORGANIZATION = """
-query GetOrganization($id: ID!) {
-    organization(id: $id) {
-        id
-        name
-        createdAt
-    }
+query GetOrganization($id: OrganizationId!) {
+  organization(input: { id: $id }) {
+    id
+    name
+  }
 }
 """
 
 # Channels
 GET_CHANNELS = """
-query GetChannels($organizationId: ID!) {
-    channels(organizationId: $organizationId) {
-        id
-        organizationId
-        platform
-        handle
-        isActive
-        createdAt
-    }
+query GetChannels($organizationId: OrganizationId!) {
+  channels(input: { organizationId: $organizationId }) {
+    id
+    name
+    service
+    avatar
+    isQueuePaused
+  }
 }
 """
 
 GET_CHANNEL = """
-query GetChannel($id: ID!) {
-    channel(id: $id) {
-        id
-        organizationId
-        platform
-        handle
-        isActive
-        createdAt
-    }
+query GetChannel($id: ChannelId!) {
+  channel(input: { id: $id }) {
+    id
+    name
+    service
+    displayName
+    avatar
+  }
 }
 """
 
-# Posts
+# Posts (cursor pagination)
 GET_POSTS = """
-query GetPosts($channelId: ID!, $limit: Int, $offset: Int) {
-    posts(channelId: $channelId, limit: $limit, offset: $offset) {
-        id
-        channelId
-        content
-        status
-        scheduledAt
-        sentAt
-        engagement {
-            likes
-            comments
-            shares
-            impressions
-            clicks
-        }
-        createdAt
-        updatedAt
+query GetPosts($organizationId: OrganizationId!, $channelId: ChannelId!, $first: Int!) {
+  posts(
+    first: $first
+    input: {
+      organizationId: $organizationId
+      filter: { channelIds: [$channelId] }
     }
+  ) {
+    edges {
+      node {
+        id
+        text
+        status
+        dueAt
+        channelId
+        createdAt
+      }
+    }
+    pageInfo {
+      hasNextPage
+      endCursor
+    }
+  }
 }
 """
 
 GET_POST = """
-query GetPost($id: ID!) {
-    post(id: $id) {
-        id
-        channelId
-        content
-        status
-        scheduledAt
-        sentAt
-        engagement {
-            likes
-            comments
-            shares
-            impressions
-            clicks
-        }
-        createdAt
-        updatedAt
-    }
+query GetPost($id: PostId!) {
+  post(input: { id: $id }) {
+    id
+    text
+    status
+    dueAt
+    channelId
+  }
 }
 """
 
 # Mutations
 CREATE_POST = """
-mutation CreatePost($channelId: ID!, $content: String!, $scheduledAt: String) {
-    createPost(channelId: $channelId, content: $content, scheduledAt: $scheduledAt) {
+mutation CreatePost($input: CreatePostInput!) {
+  createPost(input: $input) {
+    ... on PostActionSuccess {
+      post {
         id
-        channelId
-        content
+        text
         status
-        scheduledAt
-        createdAt
+        dueAt
+      }
     }
+    ... on MutationError {
+      message
+    }
+  }
 }
 """
 
 UPDATE_POST = """
-mutation UpdatePost($id: ID!, $content: String, $scheduledAt: String) {
-    updatePost(id: $id, content: $content, scheduledAt: $scheduledAt) {
+mutation UpdatePost($input: UpdatePostInput!) {
+  updatePost(input: $input) {
+    ... on PostActionSuccess {
+      post {
         id
-        content
-        scheduledAt
-        updatedAt
+        text
+        status
+        dueAt
+      }
     }
+    ... on MutationError {
+      message
+    }
+  }
 }
 """
 
 DELETE_POST = """
-mutation DeletePost($id: ID!) {
-    deletePost(id: $id) {
-        success
+mutation DeletePost($input: DeletePostInput!) {
+  deletePost(input: $input) {
+    ... on DeletePostSuccess {
+      id
     }
+    ... on MutationError {
+      message
+    }
+  }
 }
 """

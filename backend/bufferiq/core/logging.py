@@ -17,15 +17,6 @@ class JSONFormatter(logging.Formatter):
     """
 
     def format(self, record: logging.LogRecord) -> str:
-        """
-        Format log record as JSON.
-
-        Args:
-            record: Log record
-
-        Returns:
-            JSON string
-        """
         log_data: dict[str, Any] = {
             "timestamp": datetime.utcnow().isoformat(),
             "level": record.levelname,
@@ -33,25 +24,38 @@ class JSONFormatter(logging.Formatter):
             "message": record.getMessage(),
         }
 
-        # Add exception info if present
         if record.exc_info:
             log_data["exception"] = self.formatException(record.exc_info)
 
-        # Add extra fields
-        if hasattr(record, "extra"):
-            log_data["extra"] = record.extra
-
         return json.dumps(log_data)
+
+
+class StructuredLogger(logging.LoggerAdapter):
+    """
+    Logger adapter that supports structured keyword arguments.
+    Example:
+        logger.info("Loaded posts", count=500)
+    """
+
+    def process(self, msg: str, kwargs: dict[str, Any]):
+        # Extract structured fields
+        structured_fields = {
+            k: v for k, v in kwargs.items() if k not in ("exc_info", "stack_info")
+        }
+
+        if structured_fields:
+            fields = " | ".join(f"{k}={v}" for k, v in structured_fields.items())
+            msg = f"{msg} | {fields}"
+
+        # Clear kwargs so logging doesn't crash
+        return msg, {}
 
 
 def setup_logging(settings: Settings) -> None:
     """
     Configure application logging.
-
-    Args:
-        settings: Application settings
     """
-    # Create root logger
+
     root_logger = logging.getLogger()
     root_logger.setLevel(getattr(logging, settings.log_level))
 
@@ -59,14 +63,11 @@ def setup_logging(settings: Settings) -> None:
     for handler in root_logger.handlers[:]:
         root_logger.removeHandler(handler)
 
-    # Create console handler
     console_handler = logging.StreamHandler(sys.stdout)
     console_handler.setLevel(getattr(logging, settings.log_level))
 
-    # Use JSON formatter in production, simple formatter in development
-    formatter: logging.Formatter
     if settings.is_production:
-        formatter = JSONFormatter()
+        formatter: logging.Formatter = JSONFormatter()
     else:
         formatter = logging.Formatter(
             "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
@@ -75,20 +76,27 @@ def setup_logging(settings: Settings) -> None:
     console_handler.setFormatter(formatter)
     root_logger.addHandler(console_handler)
 
-    # Set third-party library log levels
+    # Reduce noise from dependencies
     logging.getLogger("aiohttp").setLevel(logging.WARNING)
     logging.getLogger("redis").setLevel(logging.WARNING)
-    logging.getLogger("sqlalchemy").setLevel(logging.WARNING)
+    logging.getLogger("sqlalchemy.engine").setLevel(logging.WARNING)
 
 
-def get_logger(name: str) -> logging.Logger:
+def get_logger(name: str) -> StructuredLogger:
     """
-    Get logger instance.
-
-    Args:
-        name: Logger name (typically __name__)
-
-    Returns:
-        Logger instance
+    Get structured logger instance.
     """
-    return logging.getLogger(name)
+
+    logger = logging.getLogger(name)
+
+    # If logging isn't configured yet, attach default handler
+    if not logger.handlers and not logging.getLogger().handlers:
+        handler = logging.StreamHandler(sys.stdout)
+        formatter = logging.Formatter(
+            "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+        )
+        handler.setFormatter(formatter)
+        logger.addHandler(handler)
+        logger.setLevel(logging.INFO)
+
+    return StructuredLogger(logger, {})

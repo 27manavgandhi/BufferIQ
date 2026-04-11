@@ -43,11 +43,7 @@ class EngagementAnalyzer:
             0.0,
         )
 
-        logger.info(
-            "Calculated engagement rates",
-            posts=len(df),
-            mean_rate=float(df["engagement_rate"].mean()),
-        )
+        logger.info(f"Calculated engagement rate for {len(df)} posts")
 
         return df
 

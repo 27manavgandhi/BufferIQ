@@ -106,10 +106,7 @@ class DataLoader:
         rows = result.fetchall()
 
         logger.info(
-            "Loaded posts from database",
-            count=len(rows),
-            channel_id=channel_id,
-            platform=platform,
+            f"Loaded {len(rows)} posts from database | channel_id={channel_id} | platform={platform}"
         )
 
         # Convert to DataFrame
@@ -160,9 +157,7 @@ class DataLoader:
         if min_engagement is not None:
             df = df[df["total_engagement"] >= min_engagement]
             logger.info(
-                "Applied minimum engagement filter",
-                min_engagement=min_engagement,
-                remaining_posts=len(df),
+                f"Applied minimum engagement filter | min_engagement={min_engagement} | remaining_posts={len(df)}"
             )
 
         return df
@@ -219,7 +214,9 @@ class DataLoader:
         result = await self.session.execute(query)
         rows = result.fetchall()
 
-        logger.info("Loaded engagement metrics", group_by=group_by, groups=len(rows))
+        logger.info(
+            f"Loaded engagement metrics | group_by={group_by} | groups={len(rows)}"
+        )
 
         # Convert to DataFrame
         if not rows:

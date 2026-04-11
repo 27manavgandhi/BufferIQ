@@ -371,7 +371,7 @@ class Visualizer:
             transform=ax.transAxes,
             fontsize=12,
             verticalalignment="top",
-            bbox=dict(boxstyle="round", facecolor="wheat", alpha=0.5),
+            bbox={"boxstyle": "round", "facecolor": "wheat", "alpha": 0.5},
         )
 
         ax.set_xlabel(x, fontsize=12)

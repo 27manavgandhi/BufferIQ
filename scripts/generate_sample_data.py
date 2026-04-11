@@ -91,7 +91,7 @@ async def generate_sample_data(
                 channels[platform] = channel
 
             # Generate posts
-            end_date = datetime.now(timezone.utc)
+            end_date = datetime.utcnow()
             start_date = end_date - timedelta(days=date_range_days)
 
             # Platform-specific characteristics
@@ -166,7 +166,7 @@ async def generate_sample_data(
 
                 # Random date within range
                 days_back = random.randint(0, date_range_days)
-                published_at = end_date - timedelta(days=days_back)
+                published_at = (end_date - timedelta(days=days_back)).replace(tzinfo=None)
 
                 # Adjust hour based on platform best times
                 if random.random() < 0.6:  # 60% chance of optimal time

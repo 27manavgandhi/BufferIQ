@@ -57,7 +57,7 @@ class RateLimiter:
         """
         return f"rate_limit:{user_id}:{window}"
 
-    async def check_limit(self, user_id: str) -> None:
+    async def check_limit(self, user_id: str, window: str | None = None) -> None:
         """
         Check if request is allowed under all rate limits.
 
@@ -67,7 +67,10 @@ class RateLimiter:
         Raises:
             BufferRateLimitError: If any rate limit is exceeded
         """
-        for window, (max_requests, window_seconds) in self.limits.items():
+        windows = [window] if window else self.limits.keys()
+
+        for window in windows:
+            max_requests, window_seconds = self.limits[window]
             key = self._get_key(user_id, window)  # type: ignore
             count_bytes = await self.redis.get(key)
 
