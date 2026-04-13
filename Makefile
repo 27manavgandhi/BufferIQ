@@ -1,4 +1,4 @@
-.PHONY: help setup install test lint format type-check clean run docker-build docker-up docker-down docker-test docker-logs db-migrate db-upgrade db-downgrade db-reset db-init validate migration
+.PHONY: help setup install test test-cov test-features lint format type-check clean run docker-build docker-up docker-down docker-test docker-logs db-migrate db-upgrade db-downgrade db-reset db-init validate migration extract-features list-features
 
 help:
 	@echo "BufferIQ Development Commands"
@@ -10,6 +10,8 @@ help:
 	@echo ""
 	@echo "Code Quality:"
 	@echo "  test           - Run tests with coverage"
+	@echo "  test-cov       - Run tests with coverage"
+	@echo "  test-features  - Run feature engineering tests"
 	@echo "  lint           - Run all linters"
 	@echo "  format         - Format code with black"
 	@echo "  type-check     - Run mypy type checker"
@@ -30,6 +32,10 @@ help:
 	@echo "  db-reset       - Reset database (down to base, up to head)"
 	@echo "  db-init        - Initialize database"
 	@echo ""
+	@echo "Feature Engineering:"
+	@echo "  extract-features  - Extract features for user"
+	@echo "  list-features     - List all available features"
+	@echo ""
 	@echo "Utilities:"
 	@echo "  clean          - Remove build artifacts"
 	@echo "  run            - Start development server"
@@ -39,13 +45,21 @@ setup:
 	.\venv\Scripts\Activate.ps1 && pip install --upgrade pip
 	.\venv\Scripts\Activate.ps1 && pip install -r backend/requirements.txt
 	.\venv\Scripts\Activate.ps1 && pre-commit install
+	python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('averaged_perceptron_tagger')"
 	@echo "Setup complete! Activate venv: .\venv\Scripts\Activate.ps1"
 
 install:
 	pip install -r backend/requirements.txt
+	cd backend && pip install -e .
 
 test:
 	cd backend && python -m pytest tests/ -v --cov=bufferiq --cov-report=term-missing --cov-report=html
+
+test-cov:
+	cd backend && pytest tests/ -v --cov=bufferiq --cov-report=term-missing --cov-report=html
+
+test-features:
+	cd backend && pytest tests/test_temporal_features.py tests/test_content_features.py tests/test_nlp_features.py tests/test_engagement_features.py tests/test_platform_features.py tests/test_feature_scaler.py tests/test_feature_selector.py tests/test_feature_pipeline.py -v --cov=bufferiq/ml/features --cov-report=term-missing --cov-fail-under=90
 
 lint:
 	cd backend && python -m black . --check
@@ -70,8 +84,11 @@ clean:
 	find . -type d -name "*.egg-info" -exec rm -rf {} +
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +
 	find . -type d -name ".mypy_cache" -exec rm -rf {} +
+	find . -type d -name ".ruff_cache" -exec rm -rf {} +
 	find . -type d -name "htmlcov" -exec rm -rf {} +
 	rm -f bufferiq.db
+	rm -rf backend/htmlcov
+	rm -rf backend/.coverage
 
 run:
 	cd backend && uvicorn bufferiq.main:app --reload
@@ -128,3 +145,10 @@ sync-status:
 .PHONY: sync-history
 sync-history:
 	cd backend && python -m bufferiq.cli.sync history --user-id=$(USER_ID)
+
+# Feature Engineering commands
+extract-features:
+	cd backend && python -m bufferiq.cli.features extract --user-id=1 --stats
+
+list-features:
+	cd backend && python -m bufferiq.cli.features list-features
