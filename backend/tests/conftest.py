@@ -260,6 +260,26 @@ async def sync_service(
 
 
 # ============================================================================
+# Sample Data Fixtures
+# ============================================================================
+
+
+@pytest.fixture
+def sample_post_data() -> dict:
+    """Create sample post data for testing."""
+    return {
+        "published_at": "2024-01-01T10:00:00Z",
+        "content": "Hello world! #test https://example.com @user",
+        "platform": "linkedin",
+        "likes": 10,
+        "comments": 2,
+        "shares": 1,
+        "impressions": 100,
+        "clicks": 5,
+    }
+
+
+# ============================================================================
 # Pytest Configuration
 # ============================================================================
 
