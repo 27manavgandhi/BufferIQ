@@ -84,3 +84,25 @@ mypy==1.7.1
 # =========================
 faker==20.1.0
 python-dateutil==2.8.2
+
+# Additional DB driver
+psycopg2-binary==2.9.9
+
+# Extended GraphQL support
+gql[all]==3.5.0
+
+# Advanced testing
+hypothesis==6.92.1
+
+# Dev workflow
+pre-commit==3.6.0
+
+# Type stubs
+types-redis==4.6.0.11
+
+# NLP & ML
+textblob==0.17.1
+nltk==3.8.1
+textstat==0.7.3
+scikit-learn==1.3.2
+joblib==1.3.2
