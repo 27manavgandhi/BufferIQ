@@ -1,0 +1,32 @@
+experiment:
+  experiment_name: "baseline_random_forest"
+  description: "Baseline random forest model with all features"
+  use_cross_validation: false
+  cv_folds: 5
+
+data:
+  target_column: "engagement_rate"
+  feature_columns: null  # Use all features
+  platforms:
+    - linkedin
+    - twitter
+    - bluesky
+  min_samples: 100
+  test_size: 0.2
+  validation_size: 0.1
+  time_based_split: true
+
+model:
+  model_type: "random_forest"
+  hyperparameters:
+    n_estimators: 100
+    max_depth: 10
+    min_samples_split: 5
+    min_samples_leaf: 2
+    random_state: 42
+
+training:
+  max_epochs: 100
+  early_stopping_patience: 10
+  checkpoint_monitor: "val_r2"
+  checkpoint_mode: "max"

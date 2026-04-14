@@ -1,0 +1,36 @@
+experiment:
+  experiment_name: "xgboost_optimized"
+  description: "XGBoost model with hyperparameter optimization"
+  use_cross_validation: false
+  cv_folds: 5
+
+data:
+  target_column: "engagement_rate"
+  platforms:
+    - linkedin
+    - twitter
+    - bluesky
+  min_samples: 100
+  test_size: 0.2
+  validation_size: 0.1
+  time_based_split: true
+
+model:
+  model_type: "xgboost"
+  hyperparameters:
+    n_estimators: 200
+    max_depth: 6
+    learning_rate: 0.1
+    subsample: 0.8
+    colsample_bytree: 0.8
+    min_child_weight: 1
+    gamma: 0
+    reg_alpha: 0
+    reg_lambda: 1
+    random_state: 42
+
+training:
+  max_epochs: 100
+  early_stopping_patience: 15
+  checkpoint_monitor: "val_r2"
+  checkpoint_mode: "max"
