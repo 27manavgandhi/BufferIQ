@@ -5,13 +5,17 @@ Provides reusable fixtures for testing database models, Redis, and Buffer API cl
 """
 
 import asyncio
+import tempfile
 from collections.abc import AsyncGenerator, Generator
 from datetime import datetime, timezone
+from typing import AsyncGenerator as TypingAsyncGenerator
 
 import pytest
 import pytest_asyncio
 from redis.asyncio import Redis
-from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
+from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker, create_async_engine
+from sqlalchemy.orm import sessionmaker
+from sqlalchemy.pool import NullPool
 
 from bufferiq.core.cache import ResponseCache
 from bufferiq.core.config import Environment, Settings
@@ -21,6 +25,7 @@ from bufferiq.core.database import (
     get_sessionmaker,
     init_database,
 )
+from bufferiq.domain.base import Base
 from bufferiq.domain.models import Channel, Organization, Post, User
 from bufferiq.infrastructure.buffer.buffer_client import BufferClient
 from bufferiq.infrastructure.buffer.rate_limiter import RateLimiter
@@ -46,7 +51,7 @@ def test_settings() -> Settings:
     """Create test settings."""
     return Settings(
         environment=Environment.TESTING,
-        database_url="sqlite:///:memory:",
+        database_url="sqlite+aiosqlite:///:memory:",
         buffer_api_url="https://graph.buffer.com/graphql",
         buffer_api_key="test_api_key",
         redis_url="redis://localhost:6379/1",
@@ -59,15 +64,23 @@ def test_settings() -> Settings:
 # ============================================================================
 
 
-@pytest_asyncio.fixture(scope="function")
+@pytest_asyncio.fixture(scope="session")
 async def test_engine(test_settings: Settings) -> AsyncGenerator[AsyncEngine, None]:
     """Create test database engine."""
-    engine = get_async_engine(test_settings)
-    await init_database(engine)
+    engine = create_async_engine(
+        test_settings.database_url,
+        poolclass=NullPool,
+        echo=False,
+    )
+
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.create_all)
 
     yield engine
 
-    await drop_database(engine)
+    async with engine.begin() as conn:
+        await conn.run_sync(Base.metadata.drop_all)
+
     await engine.dispose()
 
 
@@ -86,6 +99,18 @@ async def test_session(
     """Create test database session."""
     async with test_sessionmaker() as session:
         yield session
+
+
+@pytest.fixture
+async def db_session(test_engine: AsyncEngine) -> AsyncGenerator[AsyncSession, None]:
+    """Create test database session (alternative fixture)."""
+    async_session = sessionmaker(
+        test_engine, class_=AsyncSession, expire_on_commit=False
+    )
+
+    async with async_session() as session:
+        yield session
+        await session.rollback()
 
 
 # ============================================================================
@@ -236,11 +261,13 @@ async def test_buffer_client(
 
 @pytest_asyncio.fixture(scope="function")
 async def sync_transformer() -> BufferTransformer:
+    """Create Buffer transformer."""
     return BufferTransformer()
 
 
 @pytest_asyncio.fixture(scope="function")
 async def sync_tracker(test_session: AsyncSession) -> ProgressTracker:
+    """Create progress tracker."""
     return ProgressTracker(test_session)
 
 
@@ -251,6 +278,7 @@ async def sync_service(
     sync_transformer: BufferTransformer,
     sync_tracker: ProgressTracker,
 ) -> SyncService:
+    """Create sync service."""
     return SyncService(
         test_session,
         test_buffer_client,
@@ -277,6 +305,13 @@ def sample_post_data() -> dict:
         "impressions": 100,
         "clicks": 5,
     }
+
+
+@pytest.fixture
+def temp_dir() -> Generator[str, None, None]:
+    """Create temporary directory for tests."""
+    with tempfile.TemporaryDirectory() as tmpdir:
+        yield tmpdir
 
 
 # ============================================================================

@@ -128,3 +128,14 @@ coverage.xml
 *.bak
 *.tmp
 *.temp
+
+
+# Project specific (more granular ignores)
+outputs/models/
+outputs/experiments/
+outputs/features/*.csv
+outputs/features/*.joblib
+outputs/figures/*.png
+
+# Node
+node_modules/

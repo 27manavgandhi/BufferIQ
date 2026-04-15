@@ -1,59 +1,84 @@
-.PHONY: help setup install test test-cov test-features lint format type-check clean run docker-build docker-up docker-down docker-test docker-logs db-migrate db-upgrade db-downgrade db-reset db-init validate migration extract-features list-features
+# =========================
+# PHONY
+# =========================
+.PHONY: help setup install test test-cov test-features test-training lint format type-check clean run docker-build docker-up docker-down docker-test docker-logs db-migrate db-upgrade db-downgrade db-reset db-init validate migration migrate extract-features list-features train-baseline train-xgboost list-experiments list-models sync-initial sync-incremental sync-status sync-history
 
+# =========================
+# HELP
+# =========================
 help:
 	@echo "BufferIQ Development Commands"
 	@echo "=============================="
 	@echo ""
 	@echo "Setup & Installation:"
-	@echo "  setup          - Initial project setup"
-	@echo "  install        - Install dependencies"
+	@echo "  setup              - Initial project setup"
+	@echo "  install            - Install dependencies"
+	@echo ""
+	@echo "Development:"
+	@echo "  run                - Start development server"
+	@echo "  docker-build       - Build Docker images"
+	@echo "  docker-up          - Start all services"
+	@echo "  docker-down        - Stop all services"
+	@echo "  docker-logs        - View service logs"
+	@echo ""
+	@echo "Testing:"
+	@echo "  test               - Run tests"
+	@echo "  test-cov           - Run tests with coverage"
+	@echo "  test-features      - Feature engineering tests"
+	@echo "  test-training      - Training pipeline tests"
 	@echo ""
 	@echo "Code Quality:"
-	@echo "  test           - Run tests with coverage"
-	@echo "  test-cov       - Run tests with coverage"
-	@echo "  test-features  - Run feature engineering tests"
-	@echo "  lint           - Run all linters"
-	@echo "  format         - Format code with black"
-	@echo "  type-check     - Run mypy type checker"
-	@echo "  validate       - Run all checks (lint + test)"
-	@echo ""
-	@echo "Docker:"
-	@echo "  docker-build   - Build Docker images"
-	@echo "  docker-up      - Start all services"
-	@echo "  docker-down    - Stop all services"
-	@echo "  docker-test    - Run tests in Docker"
-	@echo "  docker-logs    - View service logs"
+	@echo "  lint               - Run linters"
+	@echo "  format             - Format code"
+	@echo "  type-check         - Run mypy"
+	@echo "  validate           - Run all checks"
 	@echo ""
 	@echo "Database:"
-	@echo "  migration      - Create new migration (use msg='message')"
-	@echo "  db-migrate     - Alias for migration"
-	@echo "  db-upgrade     - Apply migrations"
-	@echo "  db-downgrade   - Rollback last migration"
-	@echo "  db-reset       - Reset database (down to base, up to head)"
-	@echo "  db-init        - Initialize database"
+	@echo "  migration          - Create migration"
+	@echo "  migrate            - Apply migrations"
+	@echo "  db-upgrade         - Upgrade DB"
+	@echo "  db-downgrade       - Downgrade DB"
+	@echo "  db-reset           - Reset DB"
+	@echo "  db-init            - Init DB"
 	@echo ""
 	@echo "Feature Engineering:"
-	@echo "  extract-features  - Extract features for user"
-	@echo "  list-features     - List all available features"
+	@echo "  extract-features   - Extract features"
+	@echo "  list-features      - List features"
+	@echo ""
+	@echo "Model Training:"
+	@echo "  train-baseline     - Train baseline model"
+	@echo "  train-xgboost      - Train XGBoost model"
+	@echo "  list-experiments   - List experiments"
+	@echo "  list-models        - List models"
 	@echo ""
 	@echo "Utilities:"
-	@echo "  clean          - Remove build artifacts"
-	@echo "  run            - Start development server"
+	@echo "  clean              - Cleanup"
 
+# =========================
+# SETUP
+# =========================
 setup:
 	python -m venv venv
 	.\venv\Scripts\Activate.ps1 && pip install --upgrade pip
 	.\venv\Scripts\Activate.ps1 && pip install -r backend/requirements.txt
+	.\venv\Scripts\Activate.ps1 && pip install -e backend
 	.\venv\Scripts\Activate.ps1 && pre-commit install
 	python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('averaged_perceptron_tagger')"
+	mkdir -p outputs/models/checkpoints
+	mkdir -p outputs/models/registry
+	mkdir -p outputs/experiments
+	mkdir -p outputs/features
 	@echo "Setup complete! Activate venv: .\venv\Scripts\Activate.ps1"
 
 install:
-	pip install -r backend/requirements.txt
+	cd backend && pip install -r requirements.txt
 	cd backend && pip install -e .
 
+# =========================
+# TESTING
+# =========================
 test:
-	cd backend && python -m pytest tests/ -v --cov=bufferiq --cov-report=term-missing --cov-report=html
+	cd backend && pytest tests/ -v
 
 test-cov:
 	cd backend && pytest tests/ -v --cov=bufferiq --cov-report=term-missing --cov-report=html
@@ -61,8 +86,13 @@ test-cov:
 test-features:
 	cd backend && pytest tests/test_temporal_features.py tests/test_content_features.py tests/test_nlp_features.py tests/test_engagement_features.py tests/test_platform_features.py tests/test_feature_scaler.py tests/test_feature_selector.py tests/test_feature_pipeline.py -v --cov=bufferiq/ml/features --cov-report=term-missing --cov-fail-under=90
 
+test-training:
+	cd backend && pytest tests/test_data_preparation.py tests/test_experiment_tracker.py tests/test_model_registry.py tests/test_checkpoint.py tests/test_cross_validator.py tests/test_training_pipeline.py -v --cov=bufferiq/ml/training --cov-report=term-missing --cov-fail-under=90
+
+# =========================
+# CODE QUALITY
+# =========================
 lint:
-	cd backend && python -m black . --check
 	cd backend && python -m ruff .
 	cd backend && python -m mypy bufferiq/ --strict
 
@@ -76,31 +106,20 @@ type-check:
 validate: lint test
 	@echo "✅ All validation checks passed!"
 
-clean:
-	find . -type d -name __pycache__ -exec rm -rf {} +
-	find . -type f -name "*.pyc" -delete
-	find . -type f -name "*.pyo" -delete
-	find . -type f -name ".coverage" -delete
-	find . -type d -name "*.egg-info" -exec rm -rf {} +
-	find . -type d -name ".pytest_cache" -exec rm -rf {} +
-	find . -type d -name ".mypy_cache" -exec rm -rf {} +
-	find . -type d -name ".ruff_cache" -exec rm -rf {} +
-	find . -type d -name "htmlcov" -exec rm -rf {} +
-	rm -f bufferiq.db
-	rm -rf backend/htmlcov
-	rm -rf backend/.coverage
-
+# =========================
+# RUN
+# =========================
 run:
 	cd backend && uvicorn bufferiq.main:app --reload
 
+# =========================
+# DOCKER
+# =========================
 docker-build:
 	docker-compose build
 
 docker-up:
 	docker-compose up -d
-	@echo "Waiting for services to be healthy..."
-	@sleep 5
-	docker-compose ps
 
 docker-down:
 	docker-compose down
@@ -111,8 +130,14 @@ docker-logs:
 docker-test:
 	docker-compose exec backend python -m pytest tests/ -v --cov=bufferiq --cov-report=term-missing
 
+# =========================
+# DATABASE
+# =========================
 migration:
 	cd backend && alembic revision --autogenerate -m "$(msg)"
+
+migrate:
+	cd backend && alembic upgrade head
 
 db-migrate: migration
 
@@ -129,26 +154,56 @@ db-reset:
 db-init:
 	docker-compose exec backend bash /scripts/init-db.sh
 
-# Sync commands
-.PHONY: sync-initial
-sync-initial:
-	cd backend && python -m bufferiq.cli.sync initial --user-id=$(USER_ID)
-
-.PHONY: sync-incremental
-sync-incremental:
-	cd backend && python -m bufferiq.cli.sync incremental --user-id=$(USER_ID)
-
-.PHONY: sync-status
-sync-status:
-	cd backend && python -m bufferiq.cli.sync status --user-id=$(USER_ID)
-
-.PHONY: sync-history
-sync-history:
-	cd backend && python -m bufferiq.cli.sync history --user-id=$(USER_ID)
-
-# Feature Engineering commands
+# =========================
+# FEATURE ENGINEERING
+# =========================
 extract-features:
 	cd backend && python -m bufferiq.cli.features extract --user-id=1 --stats
 
 list-features:
 	cd backend && python -m bufferiq.cli.features list-features
+
+# =========================
+# MODEL TRAINING
+# =========================
+train-baseline:
+	cd backend && python -m bufferiq.cli.train run --config ../configs/training/baseline.yaml
+
+train-xgboost:
+	cd backend && python -m bufferiq.cli.train run --config ../configs/training/xgboost.yaml
+
+list-experiments:
+	cd backend && python -m bufferiq.cli.train list-experiments
+
+list-models:
+	cd backend && python -m bufferiq.cli.train list-models
+
+# =========================
+# SYNC COMMANDS
+# =========================
+sync-initial:
+	cd backend && python -m bufferiq.cli.sync initial --user-id=$(USER_ID)
+
+sync-incremental:
+	cd backend && python -m bufferiq.cli.sync incremental --user-id=$(USER_ID)
+
+sync-status:
+	cd backend && python -m bufferiq.cli.sync status --user-id=$(USER_ID)
+
+sync-history:
+	cd backend && python -m bufferiq.cli.sync history --user-id=$(USER_ID)
+
+# =========================
+# CLEANUP
+# =========================
+clean:
+	find . -type d -name "__pycache__" -exec rm -rf {} +
+	find . -type f -name "*.pyc" -delete
+	find . -type d -name "*.egg-info" -exec rm -rf {} +
+	find . -type d -name ".pytest_cache" -exec rm -rf {} +
+	find . -type d -name ".mypy_cache" -exec rm -rf {} +
+	find . -type d -name ".ruff_cache" -exec rm -rf {} +
+	find . -type d -name "htmlcov" -exec rm -rf {} +
+	rm -f bufferiq.db
+	rm -rf backend/htmlcov
+	rm -rf backend/.coverage
