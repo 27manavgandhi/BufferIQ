@@ -7,7 +7,8 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 
-from bufferiq.core.database import async_session_maker
+from bufferiq.core.database import get_db_manager
+from bufferiq.core.config import Settings
 from bufferiq.core.logging import get_logger
 from bufferiq.ml.training.config_schema import TrainingPipelineConfig
 from bufferiq.ml.training.pipeline import TrainingPipeline
@@ -37,16 +38,24 @@ async def train_model(config_path: str, verbose: bool = False) -> None:
         print()
 
     # Create training pipeline
-    async with async_session_maker() as session:
-        pipeline = TrainingPipeline(config, session)
+    
 
-        # Run training
-        if config.experiment.use_cross_validation:
-            logger.info("Running with cross-validation")
-            results = await pipeline.run_with_cross_validation()
-        else:
-            logger.info("Running single training")
-            results = await pipeline.run()
+    settings = Settings()
+
+    db = get_db_manager(settings)
+    await db.connect()
+
+    async with db.session() as session:
+       pipeline = TrainingPipeline(config, session)
+
+       if config.experiment.use_cross_validation:
+           logger.info("Running with cross-validation")
+           results = await pipeline.run_with_cross_validation()
+       else:
+           logger.info("Running single training")
+           results = await pipeline.run()
+
+    await db.disconnect()            
 
     # Print results
     print("\n" + "=" * 80)
