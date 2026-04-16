@@ -205,7 +205,7 @@ class TrainingPipeline:
 
    
     async def _load_data(self) -> pd.DataFrame:
-    """Load data from database safely for ML training."""
+    
 
     import pandas as pd
     from sqlalchemy import select
@@ -216,6 +216,7 @@ class TrainingPipeline:
     # Build query (JOIN Channel)
     # -----------------------------
     stmt = (
+        
         select(Post)
         .join(Channel, Post.channel_id == Channel.id)
         .where(Post.status == "sent")
