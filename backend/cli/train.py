@@ -8,7 +8,8 @@ import click
 
 sys.path.insert(0, str(Path(__file__).parent.parent))
 
-from bufferiq.core.database import async_session_maker
+from bufferiq.core.config import Settings
+from bufferiq.core.database import get_db_manager
 from bufferiq.core.logging import get_logger
 from bufferiq.ml.training.config_schema import TrainingPipelineConfig
 from bufferiq.ml.training.model_registry import ModelRegistry
@@ -24,9 +25,7 @@ def train() -> None:
 
 
 @train.command()
-@click.option(
-    "--config", required=True, type=str, help="Path to training config YAML"
-)
+@click.option("--config", required=True, type=str, help="Path to training config YAML")
 @click.option("--user-id", type=int, help="Optional user ID filter")
 @click.option("--cv", is_flag=True, help="Use cross-validation")
 def run(config: str, user_id: int | None, cv: bool) -> None:
@@ -34,9 +33,7 @@ def run(config: str, user_id: int | None, cv: bool) -> None:
     asyncio.run(_run_training(config, user_id, cv))
 
 
-async def _run_training(
-    config_path: str, user_id: int | None, use_cv: bool
-) -> None:
+async def _run_training(config_path: str, user_id: int | None, use_cv: bool) -> None:
     """Async training execution."""
     try:
         # Load config
@@ -47,14 +44,20 @@ async def _run_training(
             config.experiment.use_cross_validation = True
 
         # Create pipeline
-        async with async_session_maker() as session:
+        settings = Settings()
+        db_manager = get_db_manager(settings)
+
+        await db_manager.connect()
+
+        async with db_manager.session() as session:
             pipeline = TrainingPipeline(config, session)
 
-            # Run training
             if config.experiment.use_cross_validation:
                 results = await pipeline.run_with_cross_validation()
             else:
                 results = await pipeline.run()
+
+        await db_manager.disconnect()
 
         # Print results
         click.echo("\n" + "=" * 80)
@@ -64,7 +67,7 @@ async def _run_training(
         click.echo(f"Experiment Dir: {results['experiment_dir']}")
 
         if "test_metrics" in results:
-            click.echo(f"\nTest Metrics:")
+            click.echo("\nTest Metrics:")
             for metric, value in results["test_metrics"].items():
                 click.echo(f"  {metric}: {value:.4f}")
 
@@ -112,11 +115,11 @@ def show_experiment(name: str) -> None:
 
     click.echo(f"\nExperiment: {name}")
     click.echo("=" * 80)
-    click.echo(f"\nParameters:")
+    click.echo("\nParameters:")
     for key, value in tracker.get_params().items():
         click.echo(f"  {key}: {value}")
 
-    click.echo(f"\nMetrics:")
+    click.echo("\nMetrics:")
     for key, values in tracker.get_metrics().items():
         if values:
             click.echo(f"  {key}: {values[-1]['value']:.4f}")
