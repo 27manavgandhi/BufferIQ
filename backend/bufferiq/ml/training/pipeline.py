@@ -8,7 +8,7 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bufferiq.core.logging import get_logger
-from bufferiq.domain.models import Post
+from bufferiq.domain.models import Post, Channel
 from bufferiq.ml.features.pipeline import FeatureEngineeringPipeline
 from bufferiq.ml.training.checkpoint import Checkpoint
 from bufferiq.ml.training.config_schema import TrainingPipelineConfig
@@ -203,60 +203,57 @@ class TrainingPipeline:
 
         return results
 
-   
     async def _load_data(self) -> pd.DataFrame:
-    """Load data from database safely for ML training."""
+        """Load data from database safely for ML training."""
+        stmt = (
+            select(Post)
+            .join(Channel, Post.channel_id == Channel.id)
+            .where(Post.status == "sent")
+        )
 
-    stmt = (
-        select(Post)
-        .join(Channel, Post.channel_id == Channel.id)
-        .where(Post.status == "sent")
-    )
+        if self.config.data.platforms:
+            stmt = stmt.where(Channel.platform.in_(self.config.data.platforms))
 
-    if self.config.data.platforms:
-        stmt = stmt.where(Channel.platform.in_(self.config.data.platforms))
+        result = await self.session.execute(stmt)
+        posts = result.scalars().all()
 
-    result = await self.session.execute(stmt)
-    posts = result.scalars().all()
+        if not posts:
+            raise ValueError("No posts found matching criteria")
 
-    if not posts:
-        raise ValueError("No posts found matching criteria")
+        df = pd.DataFrame(
+            [
+                {
+                    "id": p.id,
+                    "user_id": p.channel.organization.user_id
+                    if p.channel and p.channel.organization
+                    else None,
+                    "channel_id": p.channel_id,
+                    "platform": p.channel.platform if p.channel else None,
+                    "content": p.content,
+                    "published_at": p.published_at or p.sent_at or p.scheduled_at,
+                    "likes": p.likes or 0,
+                    "comments": p.comments or 0,
+                    "shares": p.shares or 0,
+                    "impressions": p.impressions or 1,
+                    "clicks": p.clicks or 0,
+                }
+                for p in posts
+            ]
+        )
 
-    df = pd.DataFrame(
-        [
-            {
-                "id": p.id,
-                "user_id": p.channel.organization.user_id
-                if p.channel and p.channel.organization
-                else None,
-                "channel_id": p.channel_id,
-                "platform": p.channel.platform if p.channel else None,
-                "content": p.content,
-                "published_at": p.published_at or p.sent_at or p.scheduled_at,
-                "likes": p.likes or 0,
-                "comments": p.comments or 0,
-                "shares": p.shares or 0,
-                "impressions": p.impressions or 1,
-                "clicks": p.clicks or 0,
-            }
-            for p in posts
-        ]
-    )
+        df["engagement_rate"] = (
+            (df["likes"] + df["comments"] + df["shares"])
+            / df["impressions"].replace(0, 1)
+            * 100
+        )
 
-    df["engagement_rate"] = (
-        (df["likes"] + df["comments"] + df["shares"])
-        / df["impressions"].replace(0, 1)
-        * 100
-    )
+        df["total_engagement"] = df["likes"] + df["comments"] + df["shares"]
 
-    df["total_engagement"] = df["likes"] + df["comments"] + df["shares"]
+        df["content_length"] = df["content"].astype(str).str.len()
 
-    df["content_length"] = df["content"].astype(str).str.len()
+        logger.info(f"Loaded {len(df)} posts from database")
 
-    logger.info(f"Loaded {len(df)} posts from database")
-
-    return df
-
+        return df
 
     async def _extract_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Extract ML features."""
