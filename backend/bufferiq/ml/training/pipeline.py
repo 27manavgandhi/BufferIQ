@@ -203,52 +203,76 @@ class TrainingPipeline:
 
         return results
 
+   
     async def _load_data(self) -> pd.DataFrame:
-        """Load data from database."""
-        # Build query
-        stmt = select(Post).where(Post.status == "sent")
+    """Load data from database safely for ML training."""
 
-        # Filter by platforms
-        if self.config.data.platforms:
-            stmt = stmt.where(Post.platform.in_(self.config.data.platforms))
+    import pandas as pd
+    from sqlalchemy import select
 
-        # Execute query
-        result = await self.session.execute(stmt)
-        posts = result.scalars().all()
+    from bufferiq.domain.models import Post, Channel
 
-        if not posts:
-            raise ValueError("No posts found matching criteria")
+    # -----------------------------
+    # Build query (JOIN Channel)
+    # -----------------------------
+    stmt = (
+        select(Post)
+        .join(Channel, Post.channel_id == Channel.id)
+        .where(Post.status == "sent")
+    )
 
-        # Convert to DataFrame
-        df = pd.DataFrame(
-            [
-                {
-                    "id": post.id,
-                    "user_id": post.user_id,
-                    "channel_id": post.channel_id,
-                    "platform": post.platform,
-                    "content": post.content,
-                    "published_at": post.sent_at or post.scheduled_at,
-                    "likes": post.likes or 0,
-                    "comments": post.comments or 0,
-                    "shares": post.shares or 0,
-                    "impressions": post.impressions or 1,
-                    "clicks": post.clicks or 0,
-                }
-                for post in posts
-            ]
-        )
+    # Filter by platform via Channel (NOT Post)
+    if self.config.data.platforms:
+        stmt = stmt.where(Channel.platform.in_(self.config.data.platforms))
 
-        # Calculate engagement rate
-        df["engagement_rate"] = (
-            (df["likes"] + df["comments"] + df["shares"])
-            / df["impressions"].replace(0, 1)
-            * 100
-        )
+    # -----------------------------
+    # Execute query
+    # -----------------------------
+    result = await self.session.execute(stmt)
+    posts = result.scalars().all()
 
-        logger.info(f"Loaded {len(df)} posts from database")
+    if not posts:
+        raise ValueError("No posts found matching criteria")
 
-        return df
+    # -----------------------------
+    # ORM → DataFrame
+    # -----------------------------
+    df = pd.DataFrame(
+        [
+            {
+                "id": post.id,
+                "user_id": post.channel.organization.user_id if post.channel and post.channel.organization else None,
+                "channel_id": post.channel_id,
+                "platform": post.channel.platform if post.channel else None,
+                "content": post.content,
+                "published_at": post.published_at or post.sent_at or post.scheduled_at,
+                "likes": post.likes or 0,
+                "comments": post.comments or 0,
+                "shares": post.shares or 0,
+                "impressions": post.impressions or 1,
+                "clicks": post.clicks or 0,
+            }
+            for post in posts
+        ]
+    )
+
+    # -----------------------------
+    # Feature engineering
+    # -----------------------------
+    df["engagement_rate"] = (
+        (df["likes"] + df["comments"] + df["shares"])
+        / df["impressions"].replace(0, 1)
+        * 100
+    )
+
+    df["total_engagement"] = df["likes"] + df["comments"] + df["shares"]
+    df["content_length"] = df["content"].astype(str).str.len()
+
+    logger.info(f"Loaded {len(df)} posts from database")
+
+    return df
+
+
 
     async def _extract_features(self, df: pd.DataFrame) -> pd.DataFrame:
         """Extract ML features."""
