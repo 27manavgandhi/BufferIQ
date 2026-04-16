@@ -205,61 +205,44 @@ class TrainingPipeline:
 
    
     async def _load_data(self) -> pd.DataFrame:
-    
+    """Load data from database safely for ML training."""
 
-    import pandas as pd
-    from sqlalchemy import select
-
-    from bufferiq.domain.models import Post, Channel
-
-    # -----------------------------
-    # Build query (JOIN Channel)
-    # -----------------------------
     stmt = (
-        
         select(Post)
         .join(Channel, Post.channel_id == Channel.id)
         .where(Post.status == "sent")
     )
 
-    # Filter by platform via Channel (NOT Post)
     if self.config.data.platforms:
         stmt = stmt.where(Channel.platform.in_(self.config.data.platforms))
 
-    # -----------------------------
-    # Execute query
-    # -----------------------------
     result = await self.session.execute(stmt)
     posts = result.scalars().all()
 
     if not posts:
         raise ValueError("No posts found matching criteria")
 
-    # -----------------------------
-    # ORM → DataFrame
-    # -----------------------------
     df = pd.DataFrame(
         [
             {
-                "id": post.id,
-                "user_id": post.channel.organization.user_id if post.channel and post.channel.organization else None,
-                "channel_id": post.channel_id,
-                "platform": post.channel.platform if post.channel else None,
-                "content": post.content,
-                "published_at": post.published_at or post.sent_at or post.scheduled_at,
-                "likes": post.likes or 0,
-                "comments": post.comments or 0,
-                "shares": post.shares or 0,
-                "impressions": post.impressions or 1,
-                "clicks": post.clicks or 0,
+                "id": p.id,
+                "user_id": p.channel.organization.user_id
+                if p.channel and p.channel.organization
+                else None,
+                "channel_id": p.channel_id,
+                "platform": p.channel.platform if p.channel else None,
+                "content": p.content,
+                "published_at": p.published_at or p.sent_at or p.scheduled_at,
+                "likes": p.likes or 0,
+                "comments": p.comments or 0,
+                "shares": p.shares or 0,
+                "impressions": p.impressions or 1,
+                "clicks": p.clicks or 0,
             }
-            for post in posts
+            for p in posts
         ]
     )
 
-    # -----------------------------
-    # Feature engineering
-    # -----------------------------
     df["engagement_rate"] = (
         (df["likes"] + df["comments"] + df["shares"])
         / df["impressions"].replace(0, 1)
@@ -267,12 +250,12 @@ class TrainingPipeline:
     )
 
     df["total_engagement"] = df["likes"] + df["comments"] + df["shares"]
+
     df["content_length"] = df["content"].astype(str).str.len()
 
     logger.info(f"Loaded {len(df)} posts from database")
 
     return df
-
 
 
     async def _extract_features(self, df: pd.DataFrame) -> pd.DataFrame:
