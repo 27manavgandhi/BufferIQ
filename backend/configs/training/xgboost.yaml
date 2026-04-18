@@ -1,11 +1,12 @@
 experiment:
-  experiment_name: "xgboost_optimized"
-  description: "XGBoost model with hyperparameter optimization"
+  experiment_name: "xgboost_v1"
+  description: "XGBoost model with early stopping and regularization"
   use_cross_validation: false
   cv_folds: 5
 
 data:
   target_column: "engagement_rate"
+  feature_columns: null
   platforms:
     - linkedin
     - twitter
@@ -20,17 +21,16 @@ model:
   hyperparameters:
     n_estimators: 200
     max_depth: 6
-    learning_rate: 0.1
+    learning_rate: 0.05
     subsample: 0.8
     colsample_bytree: 0.8
-    min_child_weight: 1
-    gamma: 0
-    reg_alpha: 0
-    reg_lambda: 1
-    random_state: 42
+    min_child_weight: 3
+    gamma: 0.1
+    reg_alpha: 0.1
+    reg_lambda: 1.0
 
 training:
-  max_epochs: 100
+  max_epochs: 200
   early_stopping_patience: 15
   checkpoint_monitor: "val_r2"
   checkpoint_mode: "max"
