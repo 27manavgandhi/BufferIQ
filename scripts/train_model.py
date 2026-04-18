@@ -7,8 +7,7 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "backend"))
 
-from bufferiq.core.database import get_db_manager
-from bufferiq.core.config import Settings
+from bufferiq.core.database import async_session_maker
 from bufferiq.core.logging import get_logger
 from bufferiq.ml.training.config_schema import TrainingPipelineConfig
 from bufferiq.ml.training.pipeline import TrainingPipeline
@@ -35,27 +34,20 @@ async def train_model(config_path: str, verbose: bool = False) -> None:
         print(f"  Model: {config.model.model_type}")
         print(f"  Platforms: {config.data.platforms}")
         print(f"  Test size: {config.data.test_size}")
+        print(f"  Time-based split: {config.data.time_based_split}")
         print()
 
     # Create training pipeline
-    
+    async with async_session_maker() as session:
+        pipeline = TrainingPipeline(config, session)
 
-    settings = Settings()
-
-    db = get_db_manager(settings)
-    await db.connect()
-
-    async with db.session() as session:
-       pipeline = TrainingPipeline(config, session)
-
-       if config.experiment.use_cross_validation:
-           logger.info("Running with cross-validation")
-           results = await pipeline.run_with_cross_validation()
-       else:
-           logger.info("Running single training")
-           results = await pipeline.run()
-
-    await db.disconnect()            
+        # Run training
+        if config.experiment.use_cross_validation:
+            logger.info("Running with cross-validation")
+            results = await pipeline.run_with_cross_validation()
+        else:
+            logger.info("Running single training")
+            results = await pipeline.run()
 
     # Print results
     print("\n" + "=" * 80)
@@ -87,9 +79,7 @@ def main() -> None:
     parser.add_argument(
         "--config", required=True, help="Path to training config YAML"
     )
-    parser.add_argument(
-        "--verbose", action="store_true", help="Verbose output"
-    )
+    parser.add_argument("--verbose", action="store_true", help="Verbose output")
 
     args = parser.parse_args()
 
@@ -99,6 +89,7 @@ def main() -> None:
         print(f"\n❌ Training failed: {e}", file=sys.stderr)
         if args.verbose:
             import traceback
+
             traceback.print_exc()
         sys.exit(1)
 
