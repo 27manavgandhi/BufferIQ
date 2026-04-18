@@ -1,11 +1,12 @@
 experiment:
-  experiment_name: "lightgbm_fast"
-  description: "LightGBM model for fast training"
+  experiment_name: "lightgbm_v1"
+  description: "LightGBM model for fast training with leaf-wise growth"
   use_cross_validation: false
   cv_folds: 5
 
 data:
   target_column: "engagement_rate"
+  feature_columns: null
   platforms:
     - linkedin
     - twitter
@@ -18,7 +19,7 @@ data:
 model:
   model_type: "lightgbm"
   hyperparameters:
-    n_estimators: 150
+    n_estimators: 200
     max_depth: 7
     learning_rate: 0.05
     num_leaves: 31
@@ -27,10 +28,9 @@ model:
     min_child_samples: 20
     reg_alpha: 0.1
     reg_lambda: 0.1
-    random_state: 42
 
 training:
-  max_epochs: 100
-  early_stopping_patience: 10
+  max_epochs: 200
+  early_stopping_patience: 15
   checkpoint_monitor: "val_r2"
   checkpoint_mode: "max"
