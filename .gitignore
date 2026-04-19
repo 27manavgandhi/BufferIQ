@@ -136,6 +136,7 @@ outputs/experiments/
 outputs/features/*.csv
 outputs/features/*.joblib
 outputs/figures/*.png
-
+outputs/evaluations/
 # Node
 node_modules/
+
