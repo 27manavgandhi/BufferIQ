@@ -1,7 +1,7 @@
 # =========================
 # PHONY
 # =========================
-.PHONY: help setup install test test-cov test-features test-training lint format type-check clean run docker-build docker-up docker-down docker-test docker-logs db-migrate db-upgrade db-downgrade db-reset db-init validate migration migrate extract-features list-features train-baseline train-xgboost list-experiments list-models sync-initial sync-incremental sync-status sync-history
+.PHONY: help setup install test test-cov test-features test-training test-trainers test-evaluation lint format type-check clean run docker-build docker-up docker-down docker-test docker-logs db-migrate db-upgrade db-downgrade db-reset db-init validate migration migrate extract-features list-features train-baseline train-xgboost train-lightgbm list-experiments list-models evaluate-model compare-models sync-initial sync-incremental sync-status sync-history
 
 # =========================
 # HELP
@@ -26,6 +26,8 @@ help:
 	@echo "  test-cov           - Run tests with coverage"
 	@echo "  test-features      - Feature engineering tests"
 	@echo "  test-training      - Training pipeline tests"
+	@echo "  test-trainers      - Trainer unit tests"
+	@echo "  test-evaluation    - Evaluation pipeline tests"
 	@echo ""
 	@echo "Code Quality:"
 	@echo "  lint               - Run linters"
@@ -48,8 +50,13 @@ help:
 	@echo "Model Training:"
 	@echo "  train-baseline     - Train baseline model"
 	@echo "  train-xgboost      - Train XGBoost model"
+	@echo "  train-lightgbm     - Train LightGBM model"
 	@echo "  list-experiments   - List experiments"
 	@echo "  list-models        - List models"
+	@echo ""
+	@echo "Model Evaluation:"
+	@echo "  evaluate-model     - Evaluate specific model"
+	@echo "  compare-models     - Compare all models"
 	@echo ""
 	@echo "Utilities:"
 	@echo "  clean              - Cleanup"
@@ -68,6 +75,9 @@ setup:
 	mkdir -p outputs/models/registry
 	mkdir -p outputs/experiments
 	mkdir -p outputs/features
+	mkdir -p outputs/evaluations/reports
+	mkdir -p outputs/evaluations/residual_plots
+	mkdir -p outputs/evaluations/feature_importance
 	@echo "Setup complete! Activate venv: .\venv\Scripts\Activate.ps1"
 
 install:
@@ -88,6 +98,12 @@ test-features:
 
 test-training:
 	cd backend && pytest tests/test_data_preparation.py tests/test_experiment_tracker.py tests/test_model_registry.py tests/test_checkpoint.py tests/test_cross_validator.py tests/test_training_pipeline.py -v --cov=bufferiq/ml/training --cov-report=term-missing --cov-fail-under=90
+
+test-trainers:
+	cd backend && pytest tests/test_xgboost_trainer.py tests/test_lightgbm_trainer.py tests/test_random_forest_trainer.py -v --cov=bufferiq/ml/trainers --cov-report=term-missing --cov-fail-under=90
+
+test-evaluation:
+	cd backend && pytest tests/test_evaluator.py tests/test_feature_importance.py tests/test_visualizer_eval.py tests/test_comparator.py tests/test_performance_analyzer.py tests/test_error_analyzer.py tests/test_diagnostics.py -v --cov=bufferiq/ml/evaluation --cov-report=term-missing --cov-fail-under=90
 
 # =========================
 # CODE QUALITY
@@ -172,11 +188,23 @@ train-baseline:
 train-xgboost:
 	cd backend && python -m bufferiq.cli.train run --config ../configs/training/xgboost.yaml
 
+train-lightgbm:
+	cd backend && python -m bufferiq.cli.train run --config ../configs/training/lightgbm.yaml
+
 list-experiments:
 	cd backend && python -m bufferiq.cli.train list-experiments
 
 list-models:
 	cd backend && python -m bufferiq.cli.train list-models
+
+# =========================
+# MODEL EVALUATION
+# =========================
+evaluate-model:
+	cd backend && python -m bufferiq.cli.evaluate run --model-version 1.0.0
+
+compare-models:
+	cd backend && python -m bufferiq.cli.evaluate compare-all
 
 # =========================
 # SYNC COMMANDS
