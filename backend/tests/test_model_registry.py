@@ -69,9 +69,7 @@ class TestModelRegistry:
         self, registry: ModelRegistry, mock_model_path: str
     ) -> None:
         """Test getting model by ID."""
-        model_id = registry.register_model(
-            mock_model_path, "1.0.0", {"r2": 0.85}, {}
-        )
+        model_id = registry.register_model(mock_model_path, "1.0.0", {"r2": 0.85}, {})
 
         model = registry.get_model(model_id=model_id)
 
@@ -110,9 +108,7 @@ class TestModelRegistry:
         with pytest.raises(ValueError, match="No production model"):
             registry.get_model(production_only=True)
 
-    def test_load_model(
-        self, registry: ModelRegistry, mock_model_path: str
-    ) -> None:
+    def test_load_model(self, registry: ModelRegistry, mock_model_path: str) -> None:
         """Test loading model."""
         registry.register_model(mock_model_path, "1.0.0", {"r2": 0.85}, {})
 
@@ -148,9 +144,7 @@ class TestModelRegistry:
         assert not registry.registry["models"]["model_1_0_0"]["is_production"]
         assert registry.registry["models"]["model_2_0_0"]["is_production"]
 
-    def test_list_models(
-        self, registry: ModelRegistry, mock_model_path: str
-    ) -> None:
+    def test_list_models(self, registry: ModelRegistry, mock_model_path: str) -> None:
         """Test listing models."""
         registry.register_model(mock_model_path, "1.0.0", {"r2": 0.85}, {})
         registry.register_model(mock_model_path, "2.0.0", {"r2": 0.90}, {})
