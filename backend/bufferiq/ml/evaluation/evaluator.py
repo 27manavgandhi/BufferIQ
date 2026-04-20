@@ -1,7 +1,7 @@
 """Comprehensive model evaluation with multiple metrics."""
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import numpy as np
 import pandas as pd
@@ -46,7 +46,7 @@ class ModelEvaluator:
 
     def calculate_metrics(
         self, y_true: np.ndarray, y_pred: np.ndarray
-    ) -> Dict[str, float]:
+    ) -> dict[str, float]:
         """
         Calculate all regression metrics.
 
@@ -167,9 +167,7 @@ class ModelEvaluator:
             raise ValueError("y_true and timestamps must have same length")
 
         # Create DataFrame for easier grouping
-        df = pd.DataFrame(
-            {"y_true": y_true, "y_pred": y_pred, "timestamp": timestamps}
-        )
+        df = pd.DataFrame({"y_true": y_true, "y_pred": y_pred, "timestamp": timestamps})
 
         # Ensure timestamp is datetime
         df["timestamp"] = pd.to_datetime(df["timestamp"])
@@ -225,9 +223,7 @@ class ModelEvaluator:
             for has_url in [True, False]:
                 mask = features["has_url"] == has_url
                 if mask.sum() > 0:
-                    metrics = self.calculate_metrics(
-                        y_true[mask].values, y_pred[mask]
-                    )
+                    metrics = self.calculate_metrics(y_true[mask].values, y_pred[mask])
                     metrics["content_type"] = "Has URL" if has_url else "No URL"
                     metrics["count"] = int(mask.sum())
                     results.append(metrics)
@@ -241,9 +237,7 @@ class ModelEvaluator:
                     else features["hashtag_count"] == 0
                 )
                 if mask.sum() > 0:
-                    metrics = self.calculate_metrics(
-                        y_true[mask].values, y_pred[mask]
-                    )
+                    metrics = self.calculate_metrics(y_true[mask].values, y_pred[mask])
                     metrics["content_type"] = (
                         "Has Hashtag" if has_hashtag else "No Hashtag"
                     )
@@ -260,18 +254,14 @@ class ModelEvaluator:
             for i, label in enumerate(labels):
                 mask = (text_length >= bins[i]) & (text_length < bins[i + 1])
                 if mask.sum() > 0:
-                    metrics = self.calculate_metrics(
-                        y_true[mask].values, y_pred[mask]
-                    )
+                    metrics = self.calculate_metrics(y_true[mask].values, y_pred[mask])
                     metrics["content_type"] = label
                     metrics["count"] = int(mask.sum())
                     results.append(metrics)
 
         return pd.DataFrame(results) if results else pd.DataFrame()
 
-    def calculate_residuals(
-        self, y_true: np.ndarray, y_pred: np.ndarray
-    ) -> np.ndarray:
+    def calculate_residuals(self, y_true: np.ndarray, y_pred: np.ndarray) -> np.ndarray:
         """
         Calculate residuals.
 
@@ -342,7 +332,7 @@ class ModelEvaluator:
         y_test: pd.Series,
         platforms: Optional[pd.Series] = None,
         timestamps: Optional[pd.Series] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Generate comprehensive evaluation summary.
 
@@ -367,7 +357,7 @@ class ModelEvaluator:
         # Overall metrics
         overall_metrics = self.calculate_metrics(y_test.values, y_pred)
 
-        summary: Dict[str, Any] = {"overall_metrics": overall_metrics}
+        summary: dict[str, Any] = {"overall_metrics": overall_metrics}
 
         # Platform metrics
         if platforms is not None:
