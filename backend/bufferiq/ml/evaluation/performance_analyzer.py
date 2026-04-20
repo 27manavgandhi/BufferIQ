@@ -1,6 +1,6 @@
 """Deep-dive performance analysis."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import numpy as np
 import pandas as pd
@@ -27,7 +27,7 @@ class PerformanceAnalyzer:
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        percentiles: List[int] = [25, 50, 75, 90, 95],
+        percentiles: list[int] = [25, 50, 75, 90, 95],
     ) -> pd.DataFrame:
         """
         Analyze performance at different percentiles.
@@ -68,7 +68,9 @@ class PerformanceAnalyzer:
 
                 results.append(
                     {
-                        "percentile": f"0-{percentile}" if i == 0 else f"{percentiles[i-1]}-{percentile}",
+                        "percentile": f"0-{percentile}"
+                        if i == 0
+                        else f"{percentiles[i-1]}-{percentile}",
                         "count": int(mask.sum()),
                         "mae": float(mae),
                         "r2": float(r2),
@@ -136,7 +138,7 @@ class PerformanceAnalyzer:
 
     def detect_systematic_bias(
         self, y_true: np.ndarray, y_pred: np.ndarray
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Detect systematic prediction bias.
 
@@ -168,9 +170,15 @@ class PerformanceAnalyzer:
         high_mask = y_true >= np.percentile(y_true, 67)
 
         bias_by_range = {
-            "low_values": float(np.mean(errors[low_mask])) if low_mask.sum() > 0 else 0.0,
-            "mid_values": float(np.mean(errors[mid_mask])) if mid_mask.sum() > 0 else 0.0,
-            "high_values": float(np.mean(errors[high_mask])) if high_mask.sum() > 0 else 0.0,
+            "low_values": float(np.mean(errors[low_mask]))
+            if low_mask.sum() > 0
+            else 0.0,
+            "mid_values": float(np.mean(errors[mid_mask]))
+            if mid_mask.sum() > 0
+            else 0.0,
+            "high_values": float(np.mean(errors[high_mask]))
+            if high_mask.sum() > 0
+            else 0.0,
         }
 
         return {
