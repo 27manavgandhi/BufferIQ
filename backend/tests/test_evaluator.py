@@ -30,7 +30,9 @@ class TestModelEvaluator:
         assert (evaluator.output_dir / "residual_plots").exists()
 
     def test_calculate_metrics(
-        self, evaluator: ModelEvaluator, sample_predictions: tuple[np.ndarray, np.ndarray]
+        self,
+        evaluator: ModelEvaluator,
+        sample_predictions: tuple[np.ndarray, np.ndarray],
     ) -> None:
         """Test metrics calculation."""
         y_true, y_pred = sample_predictions
@@ -57,14 +59,14 @@ class TestModelEvaluator:
             evaluator.calculate_metrics(np.array([1, 2, 3]), np.array([1, 2]))
 
     def test_evaluate_by_platform(
-        self, evaluator: ModelEvaluator, sample_predictions: tuple[np.ndarray, np.ndarray]
+        self,
+        evaluator: ModelEvaluator,
+        sample_predictions: tuple[np.ndarray, np.ndarray],
     ) -> None:
         """Test platform-wise evaluation."""
         y_true, y_pred = sample_predictions
 
-        platforms = pd.Series(
-            ["linkedin"] * 40 + ["twitter"] * 30 + ["bluesky"] * 30
-        )
+        platforms = pd.Series(["linkedin"] * 40 + ["twitter"] * 30 + ["bluesky"] * 30)
 
         platform_metrics = evaluator.evaluate_by_platform(
             pd.Series(y_true), y_pred, platforms
@@ -76,7 +78,9 @@ class TestModelEvaluator:
         assert set(platform_metrics["platform"]) == {"linkedin", "twitter", "bluesky"}
 
     def test_evaluate_by_time_period(
-        self, evaluator: ModelEvaluator, sample_predictions: tuple[np.ndarray, np.ndarray]
+        self,
+        evaluator: ModelEvaluator,
+        sample_predictions: tuple[np.ndarray, np.ndarray],
     ) -> None:
         """Test temporal evaluation."""
         y_true, y_pred = sample_predictions
@@ -92,7 +96,9 @@ class TestModelEvaluator:
         assert "mae" in temporal_metrics.columns
 
     def test_evaluate_by_content_type(
-        self, evaluator: ModelEvaluator, sample_predictions: tuple[np.ndarray, np.ndarray]
+        self,
+        evaluator: ModelEvaluator,
+        sample_predictions: tuple[np.ndarray, np.ndarray],
     ) -> None:
         """Test content type evaluation."""
         y_true, y_pred = sample_predictions
@@ -113,7 +119,9 @@ class TestModelEvaluator:
         assert "content_type" in content_metrics.columns
 
     def test_calculate_residuals(
-        self, evaluator: ModelEvaluator, sample_predictions: tuple[np.ndarray, np.ndarray]
+        self,
+        evaluator: ModelEvaluator,
+        sample_predictions: tuple[np.ndarray, np.ndarray],
     ) -> None:
         """Test residual calculation."""
         y_true, y_pred = sample_predictions
@@ -124,7 +132,9 @@ class TestModelEvaluator:
         assert isinstance(residuals, np.ndarray)
 
     def test_identify_worst_predictions(
-        self, evaluator: ModelEvaluator, sample_predictions: tuple[np.ndarray, np.ndarray]
+        self,
+        evaluator: ModelEvaluator,
+        sample_predictions: tuple[np.ndarray, np.ndarray],
     ) -> None:
         """Test worst predictions identification."""
         y_true, y_pred = sample_predictions
