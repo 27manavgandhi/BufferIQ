@@ -1,6 +1,6 @@
 """Model diagnostics and health checks."""
 
-from typing import Any, Dict
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -26,10 +26,10 @@ class ModelDiagnostics:
 
     def check_overfitting(
         self,
-        train_metrics: Dict[str, float],
-        val_metrics: Dict[str, float],
+        train_metrics: dict[str, float],
+        val_metrics: dict[str, float],
         threshold: float = 0.1,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Check for overfitting.
 
@@ -76,8 +76,8 @@ class ModelDiagnostics:
         return result
 
     def check_underfitting(
-        self, metrics: Dict[str, float], min_r2: float = 0.5
-    ) -> Dict[str, Any]:
+        self, metrics: dict[str, float], min_r2: float = 0.5
+    ) -> dict[str, Any]:
         """
         Check for underfitting.
 
@@ -114,7 +114,7 @@ class ModelDiagnostics:
 
         return result
 
-    def check_residual_patterns(self, residuals: np.ndarray) -> Dict[str, Any]:
+    def check_residual_patterns(self, residuals: np.ndarray) -> dict[str, Any]:
         """
         Check for patterns in residuals.
 
@@ -145,7 +145,9 @@ class ModelDiagnostics:
 
         # Test for normality (Shapiro-Wilk test)
         if len(residuals) > 3:
-            _, p_value_normality = stats.shapiro(residuals[:5000])  # Limit to 5000 samples
+            _, p_value_normality = stats.shapiro(
+                residuals[:5000]
+            )  # Limit to 5000 samples
             is_normal = p_value_normality > 0.05
         else:
             p_value_normality = 1.0
@@ -165,7 +167,7 @@ class ModelDiagnostics:
 
     def check_feature_importance_concentration(
         self, importance: pd.DataFrame, threshold: float = 0.8
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Check if importance is concentrated in few features.
 
