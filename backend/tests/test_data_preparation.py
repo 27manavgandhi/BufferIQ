@@ -36,7 +36,9 @@ class TestDataPreparation:
 
     def test_split_data_basic(self, sample_df: pd.DataFrame) -> None:
         """Test basic data splitting."""
-        prep = DataPreparation(test_size=0.2, validation_size=0.1, time_based_split=False)
+        prep = DataPreparation(
+            test_size=0.2, validation_size=0.1, time_based_split=False
+        )
 
         X_train, X_val, X_test, y_train, y_val, y_test = prep.split_data(
             sample_df, "target", ["feature1", "feature2"]
@@ -49,7 +51,9 @@ class TestDataPreparation:
 
     def test_split_data_time_based(self, sample_df: pd.DataFrame) -> None:
         """Test time-based splitting."""
-        prep = DataPreparation(test_size=0.2, validation_size=0.1, time_based_split=True)
+        prep = DataPreparation(
+            test_size=0.2, validation_size=0.1, time_based_split=True
+        )
 
         X_train, X_val, X_test, y_train, y_val, y_test = prep.split_data(
             sample_df, "target", ["feature1", "feature2"], time_column="published_at"
