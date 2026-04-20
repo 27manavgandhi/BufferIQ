@@ -26,7 +26,9 @@ logger = logging.getLogger(__name__)
 class GraphQLResponse:
     """GraphQL response wrapper."""
 
-    def __init__(self, data: dict[str, Any] | None, errors: list[dict[str, Any]] | None) -> None:
+    def __init__(
+        self, data: dict[str, Any] | None, errors: list[dict[str, Any]] | None
+    ) -> None:
         self.data = data
         self.errors = errors
 
@@ -171,9 +173,7 @@ class BufferClient:
 
                         if response.status == 429:
                             retry_after = response.headers.get("Retry-After")
-                            retry_seconds = (
-                                int(retry_after) if retry_after else None
-                            )
+                            retry_seconds = int(retry_after) if retry_after else None
                             raise BufferRateLimitError(retry_after=retry_seconds)
 
                         if response.status == 400:
@@ -223,13 +223,19 @@ class BufferClient:
                 raise
 
             except (BufferAPIError, aiohttp.ClientError, asyncio.TimeoutError) as e:
-                last_error = e if isinstance(e, BufferAPIError) else BufferNetworkError(
-                    f"Network error: {str(e)}", original_error=e
+                last_error = (
+                    e
+                    if isinstance(e, BufferAPIError)
+                    else BufferNetworkError(
+                        f"Network error: {str(e)}", original_error=e
+                    )
                 )
 
                 # On last attempt, raise the error
                 if attempt == self.max_retries - 1:
-                    logger.error(f"Request failed after {self.max_retries} retries: {last_error}")
+                    logger.error(
+                        f"Request failed after {self.max_retries} retries: {last_error}"
+                    )
                     break
 
                 # Calculate backoff delay
@@ -239,7 +245,9 @@ class BufferClient:
                 if isinstance(e, BufferRateLimitError) and e.retry_after:
                     delay = max(delay, float(e.retry_after))
 
-                logger.warning(f"Request failed (attempt {attempt + 1}/{self.max_retries}), retrying in {delay:.2f}s")
+                logger.warning(
+                    f"Request failed (attempt {attempt + 1}/{self.max_retries}), retrying in {delay:.2f}s"
+                )
                 await asyncio.sleep(delay)
 
         # All retries failed
