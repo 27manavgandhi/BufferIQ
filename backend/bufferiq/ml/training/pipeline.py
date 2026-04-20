@@ -1,16 +1,15 @@
 """Training pipeline orchestrator."""
 
 import time
-from typing import Any, Optional
+from typing import Any
 
 import pandas as pd
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bufferiq.core.logging import get_logger
-from bufferiq.domain.models import Post, Channel
+from bufferiq.domain.models import Channel, Post
 from bufferiq.ml.features.pipeline import FeatureEngineeringPipeline
-from bufferiq.ml.training.checkpoint import Checkpoint
 from bufferiq.ml.training.config_schema import TrainingPipelineConfig
 from bufferiq.ml.training.cross_validator import CrossValidator
 from bufferiq.ml.training.data_preparation import DataPreparation
