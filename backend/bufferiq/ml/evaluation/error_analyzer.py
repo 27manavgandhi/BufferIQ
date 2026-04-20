@@ -1,6 +1,6 @@
 """Error analysis and failure mode detection."""
 
-from typing import Any, Dict, List
+from typing import Any
 
 import numpy as np
 import pandas as pd
@@ -27,8 +27,8 @@ class ErrorAnalyzer:
         self,
         y_true: np.ndarray,
         y_pred: np.ndarray,
-        thresholds: Dict[str, float] = {"low": 0.1, "medium": 0.2, "high": 0.3},
-    ) -> Dict[str, int]:
+        thresholds: dict[str, float] = {"low": 0.1, "medium": 0.2, "high": 0.3},
+    ) -> dict[str, int]:
         """
         Classify errors into categories.
 
@@ -50,12 +50,14 @@ class ErrorAnalyzer:
             "low_error": int(np.sum(abs_errors <= thresholds["low"])),
             "medium_error": int(
                 np.sum(
-                    (abs_errors > thresholds["low"]) & (abs_errors <= thresholds["medium"])
+                    (abs_errors > thresholds["low"])
+                    & (abs_errors <= thresholds["medium"])
                 )
             ),
             "high_error": int(
                 np.sum(
-                    (abs_errors > thresholds["medium"]) & (abs_errors <= thresholds["high"])
+                    (abs_errors > thresholds["medium"])
+                    & (abs_errors <= thresholds["high"])
                 )
             ),
             "very_high_error": int(np.sum(abs_errors > thresholds["high"])),
@@ -71,7 +73,7 @@ class ErrorAnalyzer:
         y_pred: np.ndarray,
         features: pd.DataFrame,
         error_threshold: float = 0.3,
-    ) -> List[Dict[str, Any]]:
+    ) -> list[dict[str, Any]]:
         """
         Identify common patterns in high-error predictions.
 
