@@ -1,9 +1,9 @@
 """Feature scaling utilities."""
 
-import joblib
 from pathlib import Path
-from typing import List, Literal
+from typing import Literal
 
+import joblib
 import pandas as pd
 from sklearn.preprocessing import MinMaxScaler, RobustScaler, StandardScaler
 
@@ -44,12 +44,10 @@ class FeatureScaler:
                 f"Choose from: 'standard', 'minmax', 'robust'"
             )
 
-        self._feature_columns: List[str] = []
+        self._feature_columns: list[str] = []
         self._is_fitted = False
 
-    def fit(
-        self, df: pd.DataFrame, feature_columns: List[str]
-    ) -> "FeatureScaler":
+    def fit(self, df: pd.DataFrame, feature_columns: list[str]) -> "FeatureScaler":
         """
         Fit scaler on training data.
 
@@ -71,15 +69,11 @@ class FeatureScaler:
         self._scaler.fit(df[feature_columns])
         self._is_fitted = True
 
-        logger.info(
-            f"Fitted {self.method} scaler on {len(feature_columns)} features"
-        )
+        logger.info(f"Fitted {self.method} scaler on {len(feature_columns)} features")
 
         return self
 
-    def transform(
-        self, df: pd.DataFrame, feature_columns: List[str]
-    ) -> pd.DataFrame:
+    def transform(self, df: pd.DataFrame, feature_columns: list[str]) -> pd.DataFrame:
         """
         Transform features using fitted scaler.
 
@@ -110,7 +104,7 @@ class FeatureScaler:
         return result
 
     def fit_transform(
-        self, df: pd.DataFrame, feature_columns: List[str]
+        self, df: pd.DataFrame, feature_columns: list[str]
     ) -> pd.DataFrame:
         """
         Fit and transform in one step.
@@ -126,7 +120,7 @@ class FeatureScaler:
         return self.transform(df, feature_columns)
 
     def inverse_transform(
-        self, df: pd.DataFrame, feature_columns: List[str]
+        self, df: pd.DataFrame, feature_columns: list[str]
     ) -> pd.DataFrame:
         """
         Reverse scaling transformation.
