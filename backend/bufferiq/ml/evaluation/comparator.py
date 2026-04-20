@@ -1,7 +1,7 @@
 """Model comparison utilities."""
 
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -33,7 +33,7 @@ class ModelComparator:
 
     def compare_metrics(
         self,
-        models: Dict[str, BaseTrainer],
+        models: dict[str, BaseTrainer],
         X_test: pd.DataFrame,
         y_test: pd.Series,
     ) -> pd.DataFrame:
@@ -69,7 +69,9 @@ class ModelComparator:
         # Reorder columns
         cols = ["model", "mae", "rmse", "r2", "mape"]
         cols = [c for c in cols if c in comparison_df.columns]
-        comparison_df = comparison_df[cols + [c for c in comparison_df.columns if c not in cols]]
+        comparison_df = comparison_df[
+            cols + [c for c in comparison_df.columns if c not in cols]
+        ]
 
         logger.info(f"Compared {len(models)} models")
 
@@ -77,7 +79,7 @@ class ModelComparator:
 
     def compare_by_platform(
         self,
-        models: Dict[str, BaseTrainer],
+        models: dict[str, BaseTrainer],
         X_test: pd.DataFrame,
         y_test: pd.Series,
         platforms: pd.Series,
@@ -123,7 +125,7 @@ class ModelComparator:
 
     def statistical_comparison(
         self,
-        models: Dict[str, BaseTrainer],
+        models: dict[str, BaseTrainer],
         X_test: pd.DataFrame,
         y_test: pd.Series,
     ) -> pd.DataFrame:
@@ -216,7 +218,7 @@ class ModelComparator:
 
     def plot_predictions_comparison(
         self,
-        models: Dict[str, BaseTrainer],
+        models: dict[str, BaseTrainer],
         X_test: pd.DataFrame,
         y_test: pd.Series,
         sample_size: int = 100,
@@ -257,7 +259,9 @@ class ModelComparator:
             plt.scatter(x_range, y_pred, label=name, alpha=0.6, s=50)
 
         # Plot actual
-        plt.scatter(x_range, y_sample.values, label="Actual", color="black", marker="x", s=100)
+        plt.scatter(
+            x_range, y_sample.values, label="Actual", color="black", marker="x", s=100
+        )
 
         plt.xlabel("Sample Index", fontsize=12)
         plt.ylabel("Value", fontsize=12)
@@ -275,7 +279,7 @@ class ModelComparator:
 
     def get_best_model(
         self,
-        models: Dict[str, BaseTrainer],
+        models: dict[str, BaseTrainer],
         X_test: pd.DataFrame,
         y_test: pd.Series,
         metric: str = "r2",
@@ -306,6 +310,8 @@ class ModelComparator:
 
         best_model = comparison.loc[best_idx, "model"]
 
-        logger.info(f"Best model: {best_model} ({metric}={comparison.loc[best_idx, metric]:.4f})")
+        logger.info(
+            f"Best model: {best_model} ({metric}={comparison.loc[best_idx, metric]:.4f})"
+        )
 
         return str(best_model)
