@@ -1,6 +1,6 @@
 """XGBoost trainer implementation."""
 
-from typing import Any, Dict, Optional
+from typing import Any, Optional
 
 import numpy as np
 import pandas as pd
@@ -33,9 +33,9 @@ class XGBoostTrainer(BaseTrainer):
             >>> trainer.build_model(hyperparams)
         """
         super().__init__(model_name, random_state, verbose)
-        self.hyperparameters: Dict[str, Any] = {}
+        self.hyperparameters: dict[str, Any] = {}
 
-    def build_model(self, hyperparameters: Dict[str, Any]) -> xgb.XGBRegressor:
+    def build_model(self, hyperparameters: dict[str, Any]) -> xgb.XGBRegressor:
         """
         Build XGBoost model with hyperparameters.
 
@@ -90,7 +90,7 @@ class XGBoostTrainer(BaseTrainer):
         y_train: pd.Series,
         X_val: Optional[pd.DataFrame] = None,
         y_val: Optional[pd.Series] = None,
-    ) -> Dict[str, Any]:
+    ) -> dict[str, Any]:
         """
         Train XGBoost model.
 
@@ -134,9 +134,7 @@ class XGBoostTrainer(BaseTrainer):
         y_train_pred = self.model.predict(X_train)
         train_metrics = {
             "train_mae": float(mean_absolute_error(y_train, y_train_pred)),
-            "train_rmse": float(
-                np.sqrt(mean_squared_error(y_train, y_train_pred))
-            ),
+            "train_rmse": float(np.sqrt(mean_squared_error(y_train, y_train_pred))),
             "train_r2": float(r2_score(y_train, y_train_pred)),
         }
 
@@ -176,7 +174,7 @@ class XGBoostTrainer(BaseTrainer):
 
         return self.model.predict(X)
 
-    def evaluate(self, X: pd.DataFrame, y: pd.Series) -> Dict[str, float]:
+    def evaluate(self, X: pd.DataFrame, y: pd.Series) -> dict[str, float]:
         """
         Evaluate model performance.
 
