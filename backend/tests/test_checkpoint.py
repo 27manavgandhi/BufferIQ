@@ -52,9 +52,7 @@ class TestCheckpoint:
         checkpoint_files = list(Path(temp_dir).glob("checkpoint_*.joblib"))
         assert len(checkpoint_files) == 1
 
-    def test_on_epoch_end_no_improvement(
-        self, checkpoint: Checkpoint
-    ) -> None:
+    def test_on_epoch_end_no_improvement(self, checkpoint: Checkpoint) -> None:
         """Test on_epoch_end without improvement."""
         model = {"weights": [1, 2, 3]}
 
@@ -137,9 +135,7 @@ class TestCheckpoint:
 
         assert best_model == model1
 
-    def test_restore_best_model_no_checkpoint(
-        self, checkpoint: Checkpoint
-    ) -> None:
+    def test_restore_best_model_no_checkpoint(self, checkpoint: Checkpoint) -> None:
         """Test restore with no checkpoint raises error."""
         with pytest.raises(ValueError, match="No checkpoint available"):
             checkpoint.restore_best_model()
