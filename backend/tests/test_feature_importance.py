@@ -84,9 +84,7 @@ class TestFeatureImportanceAnalyzer:
         )
         y = pd.Series([10 + i * 0.1 for i in range(50)])
 
-        comparison = analyzer.compare_importance_methods(
-            trained_model, X, y, top_n=3
-        )
+        comparison = analyzer.compare_importance_methods(trained_model, X, y, top_n=3)
 
         assert len(comparison) <= 3
         assert "feature" in comparison.columns
