@@ -20,6 +20,10 @@ from sqlalchemy.pool import NullPool, Pool, QueuePool
 from bufferiq.core.config import Settings
 from bufferiq.domain.base import Base
 
+# ---------------------------------------------------------------------------
+# Engine & Session Factory
+# ---------------------------------------------------------------------------
+
 
 def get_async_engine(settings: Settings) -> AsyncEngine:
     """
@@ -71,6 +75,11 @@ def get_sessionmaker(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
     )
 
 
+# ---------------------------------------------------------------------------
+# Database lifecycle helpers
+# ---------------------------------------------------------------------------
+
+
 async def init_database(engine: AsyncEngine) -> None:
     """
     Initialize database schema.
@@ -100,6 +109,11 @@ async def health_check(engine: AsyncEngine) -> bool:
         return True
     except Exception:
         return False
+
+
+# ---------------------------------------------------------------------------
+# Database Manager (Primary Interface)
+# ---------------------------------------------------------------------------
 
 
 class DatabaseManager:
@@ -152,18 +166,17 @@ class DatabaseManager:
                 raise
 
     async def __aenter__(self) -> "DatabaseManager":
-        """Async context manager entry."""
-
         await self.connect()
         return self
 
     async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
-        """Async context manager exit."""
-
         await self.disconnect()
 
 
-# Global manager
+# ---------------------------------------------------------------------------
+# Global Manager (Optional)
+# ---------------------------------------------------------------------------
+
 _db_manager: DatabaseManager | None = None
 
 
@@ -192,3 +205,26 @@ async def reset_db_manager() -> None:
         await _db_manager.disconnect()
 
     _db_manager = None
+
+
+# ---------------------------------------------------------------------------
+# 🔥 Lazy Global Session (for quick tests / scripts)
+# ---------------------------------------------------------------------------
+
+_engine: AsyncEngine | None = None
+async_session_maker: async_sessionmaker[AsyncSession] | None = None
+
+
+def get_global_sessionmaker() -> async_sessionmaker[AsyncSession]:
+    """
+    Lazy-loaded global sessionmaker (safe for scripts/tests).
+    """
+
+    global _engine, async_session_maker
+
+    if async_session_maker is None:
+        settings = Settings()
+        _engine = get_async_engine(settings)
+        async_session_maker = get_sessionmaker(_engine)
+
+    return async_session_maker
