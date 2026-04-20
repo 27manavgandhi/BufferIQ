@@ -1,12 +1,11 @@
 """Feature importance analysis with multiple methods."""
 
 from pathlib import Path
-from typing import Dict, Optional
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 from sklearn.inspection import permutation_importance
 
 from bufferiq.core.logging import get_logger
@@ -90,7 +89,12 @@ class FeatureImportanceAnalyzer:
 
         # Calculate permutation importance
         result = permutation_importance(
-            trainer.model, X, y, n_repeats=n_repeats, random_state=random_state, n_jobs=-1
+            trainer.model,
+            X,
+            y,
+            n_repeats=n_repeats,
+            random_state=random_state,
+            n_jobs=-1,
         )
 
         # Create DataFrame
