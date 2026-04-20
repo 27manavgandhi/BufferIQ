@@ -1,7 +1,7 @@
 """Platform-specific feature extraction."""
 
 import re
-from typing import Any, Dict, List
+from typing import Any
 
 import pandas as pd
 
@@ -64,7 +64,7 @@ class PlatformSpecificFeatureExtractor(BaseFeatureExtractor):
     """Extract platform-specific features."""
 
     @property
-    def feature_names(self) -> List[str]:
+    def feature_names(self) -> list[str]:
         """Return list of platform-specific feature names."""
         return [
             # LinkedIn
@@ -146,7 +146,7 @@ class PlatformSpecificFeatureExtractor(BaseFeatureExtractor):
 
         return result
 
-    def extract_single(self, post_data: Dict[str, Any]) -> Dict[str, Any]:
+    def extract_single(self, post_data: dict[str, Any]) -> dict[str, Any]:
         """
         Extract platform-specific features from single post.
 
@@ -184,7 +184,7 @@ class PlatformSpecificFeatureExtractor(BaseFeatureExtractor):
 
         return features
 
-    def _extract_linkedin_features(self, content: str) -> Dict[str, Any]:
+    def _extract_linkedin_features(self, content: str) -> dict[str, Any]:
         """Extract LinkedIn-specific features."""
         content_lower = content.lower()
         text_length = len(content)
@@ -233,9 +233,7 @@ class PlatformSpecificFeatureExtractor(BaseFeatureExtractor):
             "register",
             "sign up",
         ]
-        has_call_to_action = int(
-            any(phrase in content_lower for phrase in cta_phrases)
-        )
+        has_call_to_action = int(any(phrase in content_lower for phrase in cta_phrases))
 
         # Document structure score (paragraphs, bullet points)
         paragraph_count = content.count("\n\n") + 1
@@ -266,15 +264,13 @@ class PlatformSpecificFeatureExtractor(BaseFeatureExtractor):
             "optimal_length_bluesky": 0,
         }
 
-    def _extract_twitter_features(self, content: str) -> Dict[str, Any]:
+    def _extract_twitter_features(self, content: str) -> dict[str, Any]:
         """Extract Twitter-specific features."""
         content_lower = content.lower()
         text_length = len(content)
 
         # Thread starter
-        is_thread_starter = int(
-            "🧵" in content or content_lower.startswith("thread:")
-        )
+        is_thread_starter = int("🧵" in content or content_lower.startswith("thread:"))
 
         # Retweet keywords
         has_retweet_keywords = int(
@@ -329,7 +325,7 @@ class PlatformSpecificFeatureExtractor(BaseFeatureExtractor):
             "optimal_length_bluesky": 0,
         }
 
-    def _extract_bluesky_features(self, content: str) -> Dict[str, Any]:
+    def _extract_bluesky_features(self, content: str) -> dict[str, Any]:
         """Extract Bluesky-specific features."""
         content_lower = content.lower()
         text_length = len(content)
