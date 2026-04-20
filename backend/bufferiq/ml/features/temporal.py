@@ -1,7 +1,6 @@
 """Temporal feature extraction."""
 
-from datetime import datetime, timezone
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import pandas as pd
 
@@ -22,7 +21,7 @@ class TemporalFeatureExtractor(BaseFeatureExtractor):
     """Extract time-based features from posts."""
 
     @property
-    def feature_names(self) -> List[str]:
+    def feature_names(self) -> list[str]:
         """Return list of temporal feature names."""
         return [
             "hour",
@@ -86,18 +85,16 @@ class TemporalFeatureExtractor(BaseFeatureExtractor):
         result["is_business_hours"] = (
             (result["hour"] >= 9) & (result["hour"] <= 17)
         ).astype(int)
-        result["is_morning"] = (
-            (result["hour"] >= 6) & (result["hour"] < 12)
-        ).astype(int)
+        result["is_morning"] = ((result["hour"] >= 6) & (result["hour"] < 12)).astype(
+            int
+        )
         result["is_afternoon"] = (
             (result["hour"] >= 12) & (result["hour"] < 17)
         ).astype(int)
-        result["is_evening"] = (
-            (result["hour"] >= 17) & (result["hour"] < 22)
-        ).astype(int)
-        result["is_night"] = (
-            (result["hour"] >= 22) | (result["hour"] < 6)
-        ).astype(int)
+        result["is_evening"] = ((result["hour"] >= 17) & (result["hour"] < 22)).astype(
+            int
+        )
+        result["is_night"] = ((result["hour"] >= 22) | (result["hour"] < 6)).astype(int)
 
         # Peak hour indicator (platform-specific if platform column exists)
         if "platform" in df.columns:
@@ -153,13 +150,15 @@ class TemporalFeatureExtractor(BaseFeatureExtractor):
             )
 
         # Average posting interval
-        result["avg_posting_interval_hours"] = result["hours_since_last_post"].expanding().mean()
+        result["avg_posting_interval_hours"] = (
+            result["hours_since_last_post"].expanding().mean()
+        )
 
         logger.info(f"Extracted {len(result.columns)} temporal features")
 
         return result
 
-    def extract_single(self, post_data: Dict[str, Any]) -> Dict[str, Any]:
+    def extract_single(self, post_data: dict[str, Any]) -> dict[str, Any]:
         """
         Extract temporal features from single post.
 
@@ -199,9 +198,7 @@ class TemporalFeatureExtractor(BaseFeatureExtractor):
             "is_afternoon": int(12 <= hour < 17),
             "is_evening": int(17 <= hour < 22),
             "is_night": int(hour >= 22 or hour < 6),
-            "is_peak_hour": int(
-                hour in PLATFORM_PEAK_HOURS.get(platform, [9, 12, 17])
-            ),
+            "is_peak_hour": int(hour in PLATFORM_PEAK_HOURS.get(platform, [9, 12, 17])),
             "time_since_midnight": hour * 60 + published_at.minute,
             "time_until_midnight": 1440 - (hour * 60 + published_at.minute),
             # Recency features require historical data, set to 0 for single post
