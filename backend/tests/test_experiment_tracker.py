@@ -22,10 +22,7 @@ class TestExperimentTracker:
     @pytest.fixture
     def tracker(self, temp_dir: str) -> ExperimentTracker:
         """Create experiment tracker."""
-        return ExperimentTracker(
-            experiment_name="test_experiment",
-            base_dir=temp_dir
-        )
+        return ExperimentTracker(experiment_name="test_experiment", base_dir=temp_dir)
 
     def test_init(self, tracker: ExperimentTracker) -> None:
         """Test initialization."""
