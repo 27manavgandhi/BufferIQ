@@ -95,9 +95,7 @@ class TestXGBoostTrainer:
         with pytest.raises(ValueError, match="Model not trained"):
             trainer.predict(X)
 
-    def test_evaluate(
-        self, sample_data: tuple[pd.DataFrame, pd.Series]
-    ) -> None:
+    def test_evaluate(self, sample_data: tuple[pd.DataFrame, pd.Series]) -> None:
         """Test model evaluation."""
         X, y = sample_data
         X_train, X_test = X[:80], X[80:]
