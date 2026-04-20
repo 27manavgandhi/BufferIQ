@@ -1,13 +1,11 @@
 """Engagement feature extraction."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import pandas as pd
-from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from bufferiq.core.logging import get_logger
-from bufferiq.domain.models import Post
 from bufferiq.ml.features.base import BaseFeatureExtractor
 
 logger = get_logger(__name__)
@@ -26,7 +24,7 @@ class EngagementFeatureExtractor(BaseFeatureExtractor):
         self.session = session
 
     @property
-    def feature_names(self) -> List[str]:
+    def feature_names(self) -> list[str]:
         """Return list of engagement feature names."""
         return [
             "user_avg_likes",
@@ -90,24 +88,24 @@ class EngagementFeatureExtractor(BaseFeatureExtractor):
                 }
             )
 
-            result["user_avg_likes"] = df["user_id"].map(
-                user_stats["likes"]["mean"]
-            ).fillna(0)
-            result["user_avg_comments"] = df["user_id"].map(
-                user_stats["comments"]["mean"]
-            ).fillna(0)
-            result["user_avg_shares"] = df["user_id"].map(
-                user_stats["shares"]["mean"]
-            ).fillna(0)
-            result["user_avg_engagement_rate"] = df["user_id"].map(
-                user_stats["engagement_rate"]["mean"]
-            ).fillna(0)
-            result["user_median_engagement_rate"] = df["user_id"].map(
-                user_stats["engagement_rate"]["median"]
-            ).fillna(0)
-            result["user_post_count"] = df["user_id"].map(
-                user_stats["engagement_rate"]["count"]
-            ).fillna(0)
+            result["user_avg_likes"] = (
+                df["user_id"].map(user_stats["likes"]["mean"]).fillna(0)
+            )
+            result["user_avg_comments"] = (
+                df["user_id"].map(user_stats["comments"]["mean"]).fillna(0)
+            )
+            result["user_avg_shares"] = (
+                df["user_id"].map(user_stats["shares"]["mean"]).fillna(0)
+            )
+            result["user_avg_engagement_rate"] = (
+                df["user_id"].map(user_stats["engagement_rate"]["mean"]).fillna(0)
+            )
+            result["user_median_engagement_rate"] = (
+                df["user_id"].map(user_stats["engagement_rate"]["median"]).fillna(0)
+            )
+            result["user_post_count"] = (
+                df["user_id"].map(user_stats["engagement_rate"]["count"]).fillna(0)
+            )
         else:
             result["user_avg_likes"] = df["likes"].mean()
             result["user_avg_comments"] = df["comments"].mean()
@@ -127,18 +125,18 @@ class EngagementFeatureExtractor(BaseFeatureExtractor):
                 }
             )
 
-            result["platform_avg_likes"] = df["platform"].map(
-                platform_stats["likes"]
-            ).fillna(0)
-            result["platform_avg_comments"] = df["platform"].map(
-                platform_stats["comments"]
-            ).fillna(0)
-            result["platform_avg_shares"] = df["platform"].map(
-                platform_stats["shares"]
-            ).fillna(0)
-            result["platform_avg_engagement_rate"] = df["platform"].map(
-                platform_stats["engagement_rate"]
-            ).fillna(0)
+            result["platform_avg_likes"] = (
+                df["platform"].map(platform_stats["likes"]).fillna(0)
+            )
+            result["platform_avg_comments"] = (
+                df["platform"].map(platform_stats["comments"]).fillna(0)
+            )
+            result["platform_avg_shares"] = (
+                df["platform"].map(platform_stats["shares"]).fillna(0)
+            )
+            result["platform_avg_engagement_rate"] = (
+                df["platform"].map(platform_stats["engagement_rate"]).fillna(0)
+            )
         else:
             result["platform_avg_likes"] = df["likes"].mean()
             result["platform_avg_comments"] = df["comments"].mean()
@@ -198,7 +196,7 @@ class EngagementFeatureExtractor(BaseFeatureExtractor):
 
         return result
 
-    def extract_single(self, post_data: Dict[str, Any]) -> Dict[str, Any]:
+    def extract_single(self, post_data: dict[str, Any]) -> dict[str, Any]:
         """
         Extract engagement features from single post.
 
