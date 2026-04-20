@@ -1,7 +1,7 @@
 """Base feature extractor class."""
 
 from abc import ABC, abstractmethod
-from typing import Any, Dict, List
+from typing import Any
 
 import pandas as pd
 
@@ -39,7 +39,7 @@ class BaseFeatureExtractor(ABC):
 
     @property
     @abstractmethod
-    def feature_names(self) -> List[str]:
+    def feature_names(self) -> list[str]:
         """
         Return list of feature names this extractor produces.
 
@@ -65,7 +65,7 @@ class BaseFeatureExtractor(ABC):
         pass
 
     @abstractmethod
-    def extract_single(self, post_data: Dict[str, Any]) -> Dict[str, Any]:
+    def extract_single(self, post_data: dict[str, Any]) -> dict[str, Any]:
         """
         Extract features from single post dictionary.
 
@@ -84,7 +84,7 @@ class BaseFeatureExtractor(ABC):
         """
         pass
 
-    def validate_input(self, df: pd.DataFrame, required_columns: List[str]) -> None:
+    def validate_input(self, df: pd.DataFrame, required_columns: list[str]) -> None:
         """
         Validate input DataFrame has required columns.
 
