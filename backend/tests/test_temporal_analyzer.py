@@ -101,7 +101,9 @@ def test_optimal_posting_windows_with_platform(temporal_df):
     """Test optimal posting windows filtered by platform."""
     temporal_df["platform"] = "linkedin"
     analyzer = TemporalAnalyzer()
-    windows = analyzer.optimal_posting_windows(temporal_df, platform="linkedin", top_n=3)
+    windows = analyzer.optimal_posting_windows(
+        temporal_df, platform="linkedin", top_n=3
+    )
 
     assert isinstance(windows, list)
 
