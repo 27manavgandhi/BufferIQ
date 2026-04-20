@@ -122,8 +122,6 @@ class TestEvaluationVisualizer:
         val_scores = [0.60, 0.70, 0.72, 0.73]
 
         save_path = str(tmp_path / "learning_curve.png")
-        visualizer.plot_learning_curve(
-            train_sizes, train_scores, val_scores, save_path
-        )
+        visualizer.plot_learning_curve(train_sizes, train_scores, val_scores, save_path)
 
         assert mock_savefig.called
