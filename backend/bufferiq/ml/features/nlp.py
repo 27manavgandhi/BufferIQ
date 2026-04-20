@@ -1,7 +1,6 @@
 """NLP feature extraction."""
 
-import re
-from typing import Any, Dict, List
+from typing import Any
 
 import pandas as pd
 
@@ -32,7 +31,7 @@ class NLPFeatureExtractor(BaseFeatureExtractor):
     """Extract NLP features from post text."""
 
     @property
-    def feature_names(self) -> List[str]:
+    def feature_names(self) -> list[str]:
         """Return list of NLP feature names."""
         return [
             "sentiment_polarity",
@@ -124,7 +123,7 @@ class NLPFeatureExtractor(BaseFeatureExtractor):
 
         return result
 
-    def extract_single(self, post_data: Dict[str, Any]) -> Dict[str, Any]:
+    def extract_single(self, post_data: dict[str, Any]) -> dict[str, Any]:
         """
         Extract NLP features from single post.
 
@@ -140,9 +139,11 @@ class NLPFeatureExtractor(BaseFeatureExtractor):
             return {name: 0 for name in self.feature_names}
 
         # Sentiment
-        sentiment_polarity, sentiment_subjectivity, sentiment_label = (
-            self._extract_sentiment(content)
-        )
+        (
+            sentiment_polarity,
+            sentiment_subjectivity,
+            sentiment_label,
+        ) = self._extract_sentiment(content)
 
         # Readability
         flesch_reading_ease = self._safe_flesch_reading_ease(content)
