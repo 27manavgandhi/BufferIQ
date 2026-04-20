@@ -24,16 +24,16 @@ class TestModelDiagnostics:
         train_metrics = {"r2": 0.95, "mae": 0.05}
         val_metrics = {"r2": 0.75, "mae": 0.15}
 
-        result = diagnostics.check_overfitting(train_metrics, val_metrics, threshold=0.1)
+        result = diagnostics.check_overfitting(
+            train_metrics, val_metrics, threshold=0.1
+        )
 
         assert "is_overfitting" in result
         assert "train_val_gap" in result
         assert "severity" in result
         assert result["is_overfitting"]
 
-    def test_check_overfitting_no_overfit(
-        self, diagnostics: ModelDiagnostics
-    ) -> None:
+    def test_check_overfitting_no_overfit(self, diagnostics: ModelDiagnostics) -> None:
         """Test no overfitting case."""
         train_metrics = {"r2": 0.80, "mae": 0.10}
         val_metrics = {"r2": 0.78, "mae": 0.11}
@@ -52,9 +52,7 @@ class TestModelDiagnostics:
         assert "severity" in result
         assert result["is_underfitting"]
 
-    def test_check_underfitting_good_fit(
-        self, diagnostics: ModelDiagnostics
-    ) -> None:
+    def test_check_underfitting_good_fit(self, diagnostics: ModelDiagnostics) -> None:
         """Test good fit case."""
         metrics = {"r2": 0.75, "mae": 0.12}
 
