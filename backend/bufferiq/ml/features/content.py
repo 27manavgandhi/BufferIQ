@@ -1,7 +1,7 @@
 """Content feature extraction."""
 
 import re
-from typing import Any, Dict, List
+from typing import Any
 
 import pandas as pd
 
@@ -31,7 +31,7 @@ class ContentFeatureExtractor(BaseFeatureExtractor):
     """Extract content-based features from post text."""
 
     @property
-    def feature_names(self) -> List[str]:
+    def feature_names(self) -> list[str]:
         """Return list of content feature names."""
         return [
             "text_length",
@@ -96,37 +96,47 @@ class ContentFeatureExtractor(BaseFeatureExtractor):
         result["sentence_count"] = content_series.str.count(r"[.!?]+") + 1
 
         # Average sentence length
-        result["avg_sentence_length"] = (
-            result["word_count"] / result["sentence_count"]
-        )
+        result["avg_sentence_length"] = result["word_count"] / result["sentence_count"]
 
         # Paragraph count (double newlines)
         result["paragraph_count"] = content_series.str.count(r"\n\n") + 1
 
         # URL features
-        result["has_url"] = content_series.str.contains(URL_PATTERN, regex=True).astype(int)
-        result["url_count"] = content_series.apply(lambda x: len(URL_PATTERN.findall(x)))
+        result["has_url"] = content_series.str.contains(URL_PATTERN, regex=True).astype(
+            int
+        )
+        result["url_count"] = content_series.apply(
+            lambda x: len(URL_PATTERN.findall(x))
+        )
 
         # Hashtag features
-        result["has_hashtag"] = content_series.str.contains(HASHTAG_PATTERN, regex=True).astype(int)
+        result["has_hashtag"] = content_series.str.contains(
+            HASHTAG_PATTERN, regex=True
+        ).astype(int)
         result["hashtag_count"] = content_series.apply(
             lambda x: len(HASHTAG_PATTERN.findall(x))
         )
 
         # Mention features
-        result["has_mention"] = content_series.str.contains(MENTION_PATTERN, regex=True).astype(int)
+        result["has_mention"] = content_series.str.contains(
+            MENTION_PATTERN, regex=True
+        ).astype(int)
         result["mention_count"] = content_series.apply(
             lambda x: len(MENTION_PATTERN.findall(x))
         )
 
         # Emoji features
-        result["has_emoji"] = content_series.str.contains(EMOJI_PATTERN, regex=True).astype(int)
+        result["has_emoji"] = content_series.str.contains(
+            EMOJI_PATTERN, regex=True
+        ).astype(int)
         result["emoji_count"] = content_series.apply(
             lambda x: len(EMOJI_PATTERN.findall(x))
         )
 
         # Number features
-        result["has_number"] = content_series.str.contains(r"\d", regex=True).astype(int)
+        result["has_number"] = content_series.str.contains(r"\d", regex=True).astype(
+            int
+        )
         result["number_count"] = content_series.str.count(r"\d+")
 
         # Question/exclamation features
@@ -160,7 +170,7 @@ class ContentFeatureExtractor(BaseFeatureExtractor):
 
         return result
 
-    def extract_single(self, post_data: Dict[str, Any]) -> Dict[str, Any]:
+    def extract_single(self, post_data: dict[str, Any]) -> dict[str, Any]:
         """
         Extract content features from single post.
 
