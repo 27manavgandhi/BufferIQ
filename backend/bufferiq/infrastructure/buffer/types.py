@@ -1,6 +1,6 @@
 """Type definitions for Buffer API."""
 
-from typing import Any, Dict, List, Optional, TypedDict
+from typing import Any, Optional, TypedDict
 
 
 class BufferProfile(TypedDict):
@@ -20,7 +20,7 @@ class BufferPost(TypedDict):
     text: str
     created_at: int
     due_at: Optional[int]
-    statistics: Optional[Dict[str, Any]]
+    statistics: Optional[dict[str, Any]]
 
 
 class BufferUpdate(TypedDict):
@@ -33,7 +33,7 @@ class BufferUpdate(TypedDict):
     created_at: int
     due_at: Optional[int]
     sent_at: Optional[int]
-    statistics: Optional[Dict[str, int]]
+    statistics: Optional[dict[str, int]]
 
 
 class BufferStats(TypedDict):
