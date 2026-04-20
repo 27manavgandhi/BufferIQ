@@ -1,12 +1,11 @@
 """Evaluation visualizations."""
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
-import seaborn as sns
 from scipy import stats
 
 from bufferiq.core.logging import get_logger
@@ -118,7 +117,13 @@ class EvaluationVisualizer:
         # Perfect prediction line
         min_val = min(y_true.min(), y_pred.min())
         max_val = max(y_true.max(), y_pred.max())
-        plt.plot([min_val, max_val], [min_val, max_val], "r--", linewidth=2, label="Perfect Prediction")
+        plt.plot(
+            [min_val, max_val],
+            [min_val, max_val],
+            "r--",
+            linewidth=2,
+            label="Perfect Prediction",
+        )
 
         # Labels and title
         plt.xlabel("Actual Values", fontsize=12)
@@ -264,9 +269,9 @@ class EvaluationVisualizer:
 
     def plot_learning_curve(
         self,
-        train_sizes: List[int],
-        train_scores: List[float],
-        val_scores: List[float],
+        train_sizes: list[int],
+        train_scores: list[float],
+        val_scores: list[float],
         save_path: Optional[str] = None,
     ) -> None:
         """
@@ -286,9 +291,7 @@ class EvaluationVisualizer:
         plt.figure(figsize=(10, 6))
 
         plt.plot(train_sizes, train_scores, "o-", label="Training Score", linewidth=2)
-        plt.plot(
-            train_sizes, val_scores, "o-", label="Validation Score", linewidth=2
-        )
+        plt.plot(train_sizes, val_scores, "o-", label="Validation Score", linewidth=2)
 
         plt.xlabel("Training Set Size", fontsize=12)
         plt.ylabel("Score", fontsize=12)
