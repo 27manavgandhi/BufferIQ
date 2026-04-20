@@ -1,7 +1,6 @@
 """Sync scheduler for periodic data synchronization."""
 
 import asyncio
-from datetime import datetime, timedelta
 from typing import Optional
 
 from bufferiq.core.logging import get_logger
