@@ -1,0 +1,65 @@
+# XGBoost multi-objective optimization (accuracy, speed, size)
+model_type: xgboost
+strategy: optuna_multi_objective
+sampler: nsga2  # NSGA-II for multi-objective
+pruner: null  # No pruning for multi-objective
+n_trials: 150
+timeout: 5400  # 1.5 hours
+directions: [maximize, minimize, minimize]  # [accuracy, time, size]
+metrics: [r2, training_time, model_size_mb]
+cv_folds: 5
+
+# Optuna-specific configuration
+study_name: xgboost_multi_obj_001
+storage: sqlite:///outputs/optimizations/optuna_studies/xgboost_multi_obj_001.db
+
+# NSGA-II configuration
+nsga2:
+  population_size: 50
+  crossover_prob: 0.9
+  mutation_prob: null  # Auto-calculated
+
+# Search space (smaller for multi-objective)
+search_space:
+  learning_rate:
+    type: float
+    low: 0.01
+    high: 0.3
+    log: true
+  
+  max_depth:
+    type: int
+    low: 3
+    high: 10
+  
+  n_estimators:
+    type: int
+    low: 50
+    high: 300
+    step: 50
+  
+  subsample:
+    type: float
+    low: 0.6
+    high: 1.0
+  
+  colsample_bytree:
+    type: float
+    low: 0.6
+    high: 1.0
+  
+  min_child_weight:
+    type: int
+    low: 1
+    high: 10
+
+# General settings
+random_state: 42
+verbose: 1
+
+# Output configuration
+output_dir: outputs/optimizations/multi_objective/xgboost_001
+save_pareto_front: true
+save_study: true
+create_visualizations: true
+visualize_pareto: true
