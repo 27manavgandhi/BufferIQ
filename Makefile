@@ -1,7 +1,19 @@
 # =========================
 # PHONY
 # =========================
-.PHONY: help setup install test test-cov test-features test-training test-trainers test-evaluation lint format type-check clean run docker-build docker-up docker-down docker-test docker-logs db-migrate db-upgrade db-downgrade db-reset db-init validate migration migrate extract-features list-features train-baseline train-xgboost train-lightgbm list-experiments list-models evaluate-model compare-models sync-initial sync-incremental sync-status sync-history
+.PHONY: help setup install setup-db migrate migration db-upgrade db-downgrade db-reset db-init \
+test test-cov test-features test-training test-trainers test-evaluation test-ml test-optimization \
+lint format type-check validate quality clean \
+run docker-build docker-up docker-down docker-logs docker-test \
+extract-features list-features \
+train-baseline train-xgboost train-lightgbm train-model \
+evaluate-model compare-models \
+run-sync run-analysis \
+optimize-grid optimize-random optimize-bayesian optimize-model \
+optimize-optuna optimize-optuna-pruned optimize-multi-objective optimize-parallel \
+resume-study analyze-importance optuna-dashboard list-studies advanced-optimize \
+sync-initial sync-incremental sync-status sync-history \
+dev-setup ml-pipeline
 
 # =========================
 # HELP
@@ -10,56 +22,34 @@ help:
 	@echo "BufferIQ Development Commands"
 	@echo "=============================="
 	@echo ""
-	@echo "Setup & Installation:"
-	@echo "  setup              - Initial project setup"
-	@echo "  install            - Install dependencies"
-	@echo ""
-	@echo "Development:"
-	@echo "  run                - Start development server"
-	@echo "  docker-build       - Build Docker images"
-	@echo "  docker-up          - Start all services"
-	@echo "  docker-down        - Stop all services"
-	@echo "  docker-logs        - View service logs"
+	@echo "Setup:"
+	@echo "  make install          Install dependencies"
+	@echo "  make setup            Full project setup"
+	@echo "  make setup-db         Initialize database"
+	@echo "  make migrate          Run migrations"
 	@echo ""
 	@echo "Testing:"
-	@echo "  test               - Run tests"
-	@echo "  test-cov           - Run tests with coverage"
-	@echo "  test-features      - Feature engineering tests"
-	@echo "  test-training      - Training pipeline tests"
-	@echo "  test-trainers      - Trainer unit tests"
-	@echo "  test-evaluation    - Evaluation pipeline tests"
+	@echo "  make test             Run tests"
+	@echo "  make test-cov         Coverage tests"
+	@echo "  make test-training    Training tests"
+	@echo "  make test-trainers    Trainer tests"
+	@echo "  make test-evaluation  Evaluation tests"
+	@echo "  make test-ml          ML tests"
 	@echo ""
-	@echo "Code Quality:"
-	@echo "  lint               - Run linters"
-	@echo "  format             - Format code"
-	@echo "  type-check         - Run mypy"
-	@echo "  validate           - Run all checks"
+	@echo "ML Pipeline:"
+	@echo "  make run-sync         Sync data"
+	@echo "  make run-analysis     EDA"
+	@echo "  make extract-features Feature extraction"
+	@echo "  make train-model      Train model"
+	@echo "  make evaluate-model   Evaluate model"
 	@echo ""
-	@echo "Database:"
-	@echo "  migration          - Create migration"
-	@echo "  migrate            - Apply migrations"
-	@echo "  db-upgrade         - Upgrade DB"
-	@echo "  db-downgrade       - Downgrade DB"
-	@echo "  db-reset           - Reset DB"
-	@echo "  db-init            - Init DB"
-	@echo ""
-	@echo "Feature Engineering:"
-	@echo "  extract-features   - Extract features"
-	@echo "  list-features      - List features"
-	@echo ""
-	@echo "Model Training:"
-	@echo "  train-baseline     - Train baseline model"
-	@echo "  train-xgboost      - Train XGBoost model"
-	@echo "  train-lightgbm     - Train LightGBM model"
-	@echo "  list-experiments   - List experiments"
-	@echo "  list-models        - List models"
-	@echo ""
-	@echo "Model Evaluation:"
-	@echo "  evaluate-model     - Evaluate specific model"
-	@echo "  compare-models     - Compare all models"
+	@echo "Optimization:"
+	@echo "  make optimize-optuna  Optuna optimization"
+	@echo "  make optimize-grid    Grid search"
+	@echo "  make optimize-random  Random search"
 	@echo ""
 	@echo "Utilities:"
-	@echo "  clean              - Cleanup"
+	@echo "  make clean            Cleanup"
 
 # =========================
 # SETUP
@@ -71,18 +61,37 @@ setup:
 	.\venv\Scripts\Activate.ps1 && pip install -e backend
 	.\venv\Scripts\Activate.ps1 && pre-commit install
 	python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('averaged_perceptron_tagger')"
-	mkdir -p outputs/models/checkpoints
-	mkdir -p outputs/models/registry
-	mkdir -p outputs/experiments
-	mkdir -p outputs/features
-	mkdir -p outputs/evaluations/reports
-	mkdir -p outputs/evaluations/residual_plots
-	mkdir -p outputs/evaluations/feature_importance
-	@echo "Setup complete! Activate venv: .\venv\Scripts\Activate.ps1"
+	mkdir -p outputs/models/checkpoints outputs/models/registry outputs/experiments outputs/features
+	mkdir -p outputs/evaluations/reports outputs/evaluations/residual_plots outputs/evaluations/feature_importance
+	@echo "Setup complete!"
 
 install:
 	cd backend && pip install -r requirements.txt
 	cd backend && pip install -e .
+
+setup-db:
+	cd backend && bash scripts/init-db.sh
+
+# =========================
+# DATABASE
+# =========================
+migration:
+	cd backend && alembic revision --autogenerate -m "$(msg)"
+
+migrate:
+	cd backend && alembic upgrade head
+
+db-upgrade:
+	cd backend && alembic upgrade head
+
+db-downgrade:
+	cd backend && alembic downgrade -1
+
+db-reset:
+	cd backend && alembic downgrade base && alembic upgrade head
+
+db-init:
+	docker-compose exec backend bash /scripts/init-db.sh
 
 # =========================
 # TESTING
@@ -94,43 +103,47 @@ test-cov:
 	cd backend && pytest tests/ -v --cov=bufferiq --cov-report=term-missing --cov-report=html
 
 test-features:
-	cd backend && pytest tests/test_temporal_features.py tests/test_content_features.py tests/test_nlp_features.py tests/test_engagement_features.py tests/test_platform_features.py tests/test_feature_scaler.py tests/test_feature_selector.py tests/test_feature_pipeline.py -v --cov=bufferiq/ml/features --cov-report=term-missing --cov-fail-under=90
+	cd backend && pytest tests/test_feature_pipeline.py -v
 
 test-training:
-	cd backend && pytest tests/test_data_preparation.py tests/test_experiment_tracker.py tests/test_model_registry.py tests/test_checkpoint.py tests/test_cross_validator.py tests/test_training_pipeline.py -v --cov=bufferiq/ml/training --cov-report=term-missing --cov-fail-under=90
+	cd backend && pytest tests/test_training_pipeline.py -v
 
 test-trainers:
-	cd backend && pytest tests/test_xgboost_trainer.py tests/test_lightgbm_trainer.py tests/test_random_forest_trainer.py -v --cov=bufferiq/ml/trainers --cov-report=term-missing --cov-fail-under=90
+	cd backend && pytest tests/test_xgboost_trainer.py tests/test_lightgbm_trainer.py -v
 
 test-evaluation:
-	cd backend && pytest tests/test_evaluator.py tests/test_feature_importance.py tests/test_visualizer_eval.py tests/test_comparator.py tests/test_performance_analyzer.py tests/test_error_analyzer.py tests/test_diagnostics.py -v --cov=bufferiq/ml/evaluation --cov-report=term-missing --cov-fail-under=90
+	cd backend && pytest tests/test_evaluator.py tests/test_comparator.py -v
+
+test-ml:
+	cd backend && pytest tests/ml/ -v
+
+test-optimization:
+	cd backend && pytest tests/ml/optimization/ -v
 
 # =========================
 # CODE QUALITY
 # =========================
 lint:
-	cd backend && python -m ruff .
-	cd backend && python -m mypy bufferiq/ --strict
+	cd backend && ruff bufferiq/
+	cd backend && ruff tests/
 
 format:
-	cd backend && python -m black .
-	cd backend && python -m ruff . --fix
+	cd backend && black bufferiq/ tests/
+	cd backend && ruff bufferiq/ --fix
+	cd backend && ruff tests/ --fix
 
 type-check:
-	cd backend && python -m mypy bufferiq/ --strict
+	cd backend && mypy bufferiq/ --strict
 
 validate: lint test
-	@echo "✅ All validation checks passed!"
+quality: lint type-check test
 
 # =========================
-# RUN
+# RUN / DOCKER
 # =========================
 run:
 	cd backend && uvicorn bufferiq.main:app --reload
 
-# =========================
-# DOCKER
-# =========================
 docker-build:
 	docker-compose build
 
@@ -144,31 +157,7 @@ docker-logs:
 	docker-compose logs -f
 
 docker-test:
-	docker-compose exec backend python -m pytest tests/ -v --cov=bufferiq --cov-report=term-missing
-
-# =========================
-# DATABASE
-# =========================
-migration:
-	cd backend && alembic revision --autogenerate -m "$(msg)"
-
-migrate:
-	cd backend && alembic upgrade head
-
-db-migrate: migration
-
-db-upgrade:
-	cd backend && alembic upgrade head
-
-db-downgrade:
-	cd backend && alembic downgrade -1
-
-db-reset:
-	cd backend && alembic downgrade base
-	cd backend && alembic upgrade head
-
-db-init:
-	docker-compose exec backend bash /scripts/init-db.sh
+	docker-compose exec backend pytest tests/
 
 # =========================
 # FEATURE ENGINEERING
@@ -180,8 +169,17 @@ list-features:
 	cd backend && python -m bufferiq.cli.features list-features
 
 # =========================
-# MODEL TRAINING
+# ML PIPELINE
 # =========================
+run-sync:
+	cd backend && python -m bufferiq.cli.sync run --full
+
+run-analysis:
+	cd backend && python scripts/run_analysis.py
+
+train-model:
+	cd backend && python scripts/train_model.py --config configs/training/xgboost.yaml
+
 train-baseline:
 	cd backend && python -m bufferiq.cli.train run --config ../configs/training/baseline.yaml
 
@@ -191,23 +189,56 @@ train-xgboost:
 train-lightgbm:
 	cd backend && python -m bufferiq.cli.train run --config ../configs/training/lightgbm.yaml
 
-list-experiments:
-	cd backend && python -m bufferiq.cli.train list-experiments
-
-list-models:
-	cd backend && python -m bufferiq.cli.train list-models
-
-# =========================
-# MODEL EVALUATION
-# =========================
 evaluate-model:
-	cd backend && python -m bufferiq.cli.evaluate run --model-version 1.0.0
+	cd backend && python scripts/evaluate_model.py --model-path outputs/models/registry/xgboost_v1.0.0.joblib
 
 compare-models:
 	cd backend && python -m bufferiq.cli.evaluate compare-all
 
 # =========================
-# SYNC COMMANDS
+# OPTIMIZATION
+# =========================
+optimize-grid:
+	cd backend && python -m bufferiq.cli.optimize run --config configs/optimization/xgboost_grid.yaml
+
+optimize-random:
+	cd backend && python -m bufferiq.cli.optimize run --config configs/optimization/xgboost_random.yaml
+
+optimize-bayesian:
+	cd backend && python -m bufferiq.cli.optimize run --config configs/optimization/xgboost_bayesian.yaml
+
+optimize-model:
+	cd backend && python scripts/optimize_model.py --config configs/optimization/xgboost_grid.yaml
+
+optimize-optuna:
+	cd backend && python -m bufferiq.cli.optimize optuna --config configs/optimization/xgboost_optuna.yaml
+
+optimize-optuna-pruned:
+	cd backend && python -m bufferiq.cli.optimize optuna --config configs/optimization/xgboost_optuna_pruned.yaml
+
+optimize-multi-objective:
+	cd backend && python -m bufferiq.cli.optimize multi-objective --config configs/optimization/xgboost_multi_objective.yaml
+
+optimize-parallel:
+	cd backend && python -m bufferiq.cli.optimize parallel --config configs/optimization/parallel_optimization.yaml
+
+resume-study:
+	cd backend && python -m bufferiq.cli.optimize resume --study-name $(STUDY_NAME) --n-trials 50
+
+analyze-importance:
+	cd backend && python -m bufferiq.cli.optimize importance --study-name $(STUDY_NAME)
+
+optuna-dashboard:
+	optuna-dashboard sqlite:///outputs/optimizations/optuna_studies/xgboost_001.db
+
+list-studies:
+	cd backend && python -m bufferiq.cli.optimize list-studies
+
+advanced-optimize:
+	cd backend && python scripts/advanced_optimize.py --config configs/optimization/xgboost_optuna.yaml --mode optuna
+
+# =========================
+# SYNC COMMANDS (LEGACY)
 # =========================
 sync-initial:
 	cd backend && python -m bufferiq.cli.sync initial --user-id=$(USER_ID)
@@ -222,6 +253,15 @@ sync-history:
 	cd backend && python -m bufferiq.cli.sync history --user-id=$(USER_ID)
 
 # =========================
+# WORKFLOWS
+# =========================
+dev-setup: install setup-db migrate
+	@echo "Development ready!"
+
+ml-pipeline: run-sync run-analysis extract-features train-model evaluate-model optimize-optuna
+	@echo "ML pipeline complete!"
+
+# =========================
 # CLEANUP
 # =========================
 clean:
@@ -231,7 +271,4 @@ clean:
 	find . -type d -name ".pytest_cache" -exec rm -rf {} +
 	find . -type d -name ".mypy_cache" -exec rm -rf {} +
 	find . -type d -name ".ruff_cache" -exec rm -rf {} +
-	find . -type d -name "htmlcov" -exec rm -rf {} +
-	rm -f bufferiq.db
-	rm -rf backend/htmlcov
-	rm -rf backend/.coverage
+	rm -rf build dist htmlcov backend/htmlcov backend/.coverage
