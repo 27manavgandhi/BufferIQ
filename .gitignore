@@ -140,3 +140,31 @@ outputs/evaluations/
 # Node
 node_modules/
 
+# Packaging
+MANIFEST
+
+# Virtual environments (missing exact variant)
+.venv
+
+# Database-related (you partially had these, but missing exact coverage cleanup)
+*.sqlite3   # (already present, but keep if consistency matters)
+*.db-journal  # (already present, but included differently)
+
+# Project-specific (new granular paths)
+outputs/figures/
+outputs/features/
+outputs/models/checkpoints/
+outputs/models/registry/
+outputs/optimizations/trials/
+outputs/optimizations/best_params/
+outputs/optimizations/search_progress/
+
+# Optuna-specific (completely new)
+outputs/optimizations/optuna_studies/
+outputs/optimizations/param_importance/
+outputs/optimizations/multi_objective/
+outputs/optimizations/performance_profiles/
+optuna_studies/
+
+# Alembic (more precise cache ignore)
+alembic/versions/__pycache__/
