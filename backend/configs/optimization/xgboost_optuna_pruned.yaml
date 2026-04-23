@@ -1,0 +1,82 @@
+# XGBoost hyperparameter optimization with aggressive pruning
+model_type: xgboost
+strategy: optuna
+sampler: tpe
+pruner: hyperband  # Aggressive Hyperband pruner
+n_trials: 200
+timeout: 7200  # 2 hours
+direction: maximize
+metric: r2
+cv_folds: 3  # Fewer folds for faster evaluation with pruning
+
+# Optuna-specific configuration
+study_name: xgboost_optuna_pruned_001
+storage: sqlite:///outputs/optimizations/optuna_studies/xgboost_pruned_001.db
+
+# Pruning configuration
+pruning:
+  min_resource: 1  # Minimum CV fold to evaluate
+  max_resource: 3  # Maximum CV folds
+  reduction_factor: 3
+  n_startup_trials: 10  # No pruning for first 10 trials
+
+# Search space (same as xgboost_optuna.yaml)
+search_space:
+  learning_rate:
+    type: float
+    low: 0.01
+    high: 0.3
+    log: true
+  
+  max_depth:
+    type: int
+    low: 3
+    high: 10
+  
+  n_estimators:
+    type: int
+    low: 100
+    high: 500
+    step: 50
+  
+  subsample:
+    type: float
+    low: 0.6
+    high: 1.0
+  
+  colsample_bytree:
+    type: float
+    low: 0.6
+    high: 1.0
+  
+  min_child_weight:
+    type: int
+    low: 1
+    high: 10
+  
+  gamma:
+    type: float
+    low: 0.0
+    high: 0.5
+  
+  reg_alpha:
+    type: float
+    low: 0.001
+    high: 10.0
+    log: true
+  
+  reg_lambda:
+    type: float
+    low: 0.001
+    high: 10.0
+    log: true
+
+# General settings
+random_state: 42
+verbose: 1
+
+# Output configuration
+output_dir: outputs/optimizations/optuna/xgboost_pruned_001
+save_best_params: true
+save_study: true
+create_visualizations: true
