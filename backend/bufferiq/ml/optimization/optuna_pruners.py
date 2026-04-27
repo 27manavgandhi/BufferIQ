@@ -1,8 +1,7 @@
 """Optuna pruner registry and factory."""
 
-from typing import Any, Dict, List
+from typing import Any
 
-import optuna
 from optuna.pruners import (
     BasePruner,
     HyperbandPruner,
@@ -20,7 +19,7 @@ logger = get_logger(__name__)
 class PrunerRegistry:
     """
     Centralized registry for Optuna pruners.
-    
+
     Provides factory methods to create pruners by name with
     appropriate default parameters.
     """
@@ -29,18 +28,18 @@ class PrunerRegistry:
     def get_pruner(name: str, **kwargs: Any) -> BasePruner:
         """
         Get pruner by name.
-        
+
         Args:
             name: Pruner name ('median', 'hyperband', 'percentile',
                   'successive_halving', 'nop')
             **kwargs: Pruner-specific parameters
-        
+
         Returns:
             Configured pruner instance
-        
+
         Raises:
             ValueError: If pruner name is unknown
-        
+
         Example:
             >>> pruner = PrunerRegistry.get_pruner('median', n_startup_trials=5)
             >>> isinstance(pruner, MedianPruner)
@@ -80,23 +79,23 @@ class PrunerRegistry:
             )
 
     @staticmethod
-    def list_pruners() -> List[str]:
+    def list_pruners() -> list[str]:
         """
         Get list of available pruner names.
-        
+
         Returns:
             List of pruner names
         """
         return ["median", "hyperband", "percentile", "successive_halving", "nop"]
 
     @staticmethod
-    def get_default_config(name: str) -> Dict[str, Any]:
+    def get_default_config(name: str) -> dict[str, Any]:
         """
         Get default configuration for a pruner.
-        
+
         Args:
             name: Pruner name
-        
+
         Returns:
             Dictionary of default parameters
         """
@@ -124,8 +123,8 @@ class PrunerRegistry:
             },
             "nop": {},
         }
-        
+
         if name not in configs:
             raise ValueError(f"Unknown pruner: {name}")
-        
+
         return configs[name]
