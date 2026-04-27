@@ -168,3 +168,9 @@ optuna_studies/
 
 # Alembic (more precise cache ignore)
 alembic/versions/__pycache__/
+
+# Existing entries...
+
+# Ensemble outputs (Day 13)
+outputs/ensembles/
+outputs/models/ensembles/
