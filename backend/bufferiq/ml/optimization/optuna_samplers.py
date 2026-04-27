@@ -1,8 +1,7 @@
 """Optuna sampler registry and factory."""
 
-from typing import Any, Dict, List, Optional
+from typing import Any
 
-import optuna
 from optuna.samplers import (
     BaseSampler,
     CmaEsSampler,
@@ -20,7 +19,7 @@ logger = get_logger(__name__)
 class SamplerRegistry:
     """
     Centralized registry for Optuna samplers.
-    
+
     Provides factory methods to create samplers by name with
     appropriate default parameters.
     """
@@ -29,18 +28,18 @@ class SamplerRegistry:
     def get_sampler(name: str, seed: int = 42, **kwargs: Any) -> BaseSampler:
         """
         Get sampler by name.
-        
+
         Args:
             name: Sampler name ('tpe', 'random', 'grid', 'cmaes', 'nsga2')
             seed: Random seed for reproducibility
             **kwargs: Sampler-specific parameters
-        
+
         Returns:
             Configured sampler instance
-        
+
         Raises:
             ValueError: If sampler name is unknown
-        
+
         Example:
             >>> sampler = SamplerRegistry.get_sampler('tpe', seed=42)
             >>> isinstance(sampler, TPESampler)
@@ -79,23 +78,23 @@ class SamplerRegistry:
             )
 
     @staticmethod
-    def list_samplers() -> List[str]:
+    def list_samplers() -> list[str]:
         """
         Get list of available sampler names.
-        
+
         Returns:
             List of sampler names
         """
         return ["tpe", "random", "grid", "cmaes", "nsga2"]
 
     @staticmethod
-    def get_default_config(name: str) -> Dict[str, Any]:
+    def get_default_config(name: str) -> dict[str, Any]:
         """
         Get default configuration for a sampler.
-        
+
         Args:
             name: Sampler name
-        
+
         Returns:
             Dictionary of default parameters
         """
@@ -116,8 +115,8 @@ class SamplerRegistry:
                 "crossover_prob": 0.9,
             },
         }
-        
+
         if name not in configs:
             raise ValueError(f"Unknown sampler: {name}")
-        
+
         return configs[name]
