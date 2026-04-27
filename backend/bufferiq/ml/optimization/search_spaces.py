@@ -1,6 +1,6 @@
 """Predefined search spaces for hyperparameter optimization."""
 
-from typing import Any, Dict, List
+from typing import Any
 
 from scipy.stats import loguniform, randint, uniform
 
@@ -10,7 +10,8 @@ logger = get_logger(__name__)
 
 # Try to import skopt spaces
 try:
-    from skopt.space import Real, Integer
+    from skopt.space import Integer, Real
+
     SKOPT_AVAILABLE = True
 except ImportError:
     SKOPT_AVAILABLE = False
@@ -145,6 +146,7 @@ else:
 # Search Space Registry
 # ============================================================================
 
+
 class SearchSpaceRegistry:
     """Registry for model-specific search spaces."""
 
@@ -170,22 +172,20 @@ class SearchSpaceRegistry:
     }
 
     @classmethod
-    def get_search_space(
-        cls, model_type: str, strategy: str
-    ) -> Dict[str, Any]:
+    def get_search_space(cls, model_type: str, strategy: str) -> dict[str, Any]:
         """
         Get search space for a model type and strategy.
-        
+
         Args:
             model_type: Model type ('xgboost', 'lightgbm', 'random_forest')
             strategy: Search strategy ('grid', 'random', 'bayesian')
-        
+
         Returns:
             Search space dictionary
-        
+
         Raises:
             ValueError: If model_type or strategy is invalid
-        
+
         Example:
             >>> space = SearchSpaceRegistry.get_search_space('xgboost', 'grid')
             >>> print(space['learning_rate'])
@@ -215,12 +215,12 @@ class SearchSpaceRegistry:
             )
 
     @classmethod
-    def list_model_types(cls) -> List[str]:
+    def list_model_types(cls) -> list[str]:
         """Get list of supported model types."""
         return list(cls._GRID_SPACES.keys())
 
     @classmethod
-    def list_strategies(cls) -> List[str]:
+    def list_strategies(cls) -> list[str]:
         """Get list of supported search strategies."""
         strategies = ["grid", "random"]
         if SKOPT_AVAILABLE:
