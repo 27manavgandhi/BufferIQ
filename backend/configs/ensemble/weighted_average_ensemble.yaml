@@ -1,0 +1,38 @@
+# Weighted Average Ensemble Configuration
+# Combines predictions using optimized weights
+
+ensemble_type: weighted_average
+
+# Base models
+base_models:
+  - outputs/models/xgboost_best.joblib
+  - outputs/models/lightgbm_best.joblib
+  - outputs/models/random_forest_best.joblib
+
+# Weight method: uniform, performance, or optimized
+weight_method: optimized
+
+# Custom weights (optional)
+# weights: [0.50, 0.30, 0.20]
+
+# Optuna configuration for weight optimization
+optuna_config:
+  n_trials: 150
+  timeout: 900
+  sampler: tpe
+  cv_folds: 5
+
+# Model selection criteria
+selection:
+  min_performance: 0.70
+  max_models: 5
+  min_diversity: 0.10
+
+# Output configuration
+output_dir: outputs/models/ensembles
+model_name: weighted_average_ensemble
+version: "1.0.0"
+description: "Weighted average ensemble with optimized weights"
+
+# Random seed
+random_state: 42

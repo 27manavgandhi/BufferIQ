@@ -1,0 +1,40 @@
+# Voting Ensemble Configuration
+# Combines predictions from multiple models using weighted voting
+
+ensemble_type: voting
+voting_method: soft  # soft or hard
+
+# Base models to combine
+base_models:
+  - outputs/models/xgboost_best.joblib
+  - outputs/models/lightgbm_best.joblib
+  - outputs/models/random_forest_best.joblib
+
+# Weight optimization method
+# Options: none, uniform, performance, optuna, grid
+weight_optimization: optuna
+
+# Custom weights (optional - if not provided, will be optimized)
+# weights: [0.45, 0.35, 0.20]
+
+# Optuna configuration for weight optimization
+optuna_config:
+  n_trials: 100
+  timeout: 600
+  sampler: tpe
+  cv_folds: 5
+
+# Model selection criteria
+selection:
+  min_performance: 0.70  # Minimum R² to include model
+  max_models: 5          # Maximum models in ensemble
+  min_diversity: 0.10    # Minimum correlation diversity
+
+# Output configuration
+output_dir: outputs/models/ensembles
+model_name: voting_ensemble
+version: "1.0.0"
+description: "Voting ensemble combining XGBoost, LightGBM, and RandomForest"
+
+# Random seed for reproducibility
+random_state: 42

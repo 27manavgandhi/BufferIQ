@@ -1,0 +1,55 @@
+# Auto Ensemble Configuration
+# Automatically selects best ensemble type
+
+ensemble_type: auto
+
+# Base models
+base_models:
+  - outputs/models/xgboost_best.joblib
+  - outputs/models/lightgbm_best.joblib
+  - outputs/models/random_forest_best.joblib
+  - outputs/models/gradient_boosting_best.joblib
+  - outputs/models/extra_trees_best.joblib
+
+# Model selection criteria (applied before building ensembles)
+selection:
+  min_performance: 0.70
+  max_models: 5
+  min_diversity: 0.15
+
+# Weight optimization for voting/weighted ensembles
+weight_optimization: optuna
+
+# Optuna configuration
+optuna_config:
+  n_trials: 100
+  timeout: 600
+  sampler: tpe
+  cv_folds: 5
+
+# Meta-learner for stacking/blending (will try multiple)
+meta_learner:
+  type: ridge
+  params:
+    alpha: 1.0
+    fit_intercept: true
+    random_state: 42
+
+# Stacking settings
+cv_folds: 5
+passthrough: false
+
+# Blending settings
+blend_split: 0.3
+
+# Diversity threshold
+diversity_threshold: 0.15
+
+# Output configuration
+output_dir: outputs/models/ensembles
+model_name: auto_ensemble
+version: "1.0.0"
+description: "Auto-selected best ensemble type"
+
+# Random seed
+random_state: 42

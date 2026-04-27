@@ -1,0 +1,42 @@
+# Stacking Ensemble Configuration
+# Uses meta-learner to combine base model predictions
+
+ensemble_type: stacking
+
+# Base models
+base_models:
+  - outputs/models/xgboost_best.joblib
+  - outputs/models/lightgbm_best.joblib
+  - outputs/models/random_forest_best.joblib
+
+# Meta-learner configuration
+meta_learner:
+  type: ridge
+  params:
+    alpha: 1.0
+    fit_intercept: true
+    random_state: 42
+
+# Cross-validation settings for out-of-fold predictions
+cv_folds: 5
+
+# Include original features in meta-learner
+passthrough: false
+
+# Model selection criteria
+selection:
+  min_performance: 0.70
+  max_models: 5
+  min_diversity: 0.15
+
+# Diversity threshold
+diversity_threshold: 0.15
+
+# Output configuration
+output_dir: outputs/models/ensembles
+model_name: stacking_ensemble
+version: "1.0.0"
+description: "Stacking ensemble with Ridge meta-learner"
+
+# Random seed
+random_state: 42

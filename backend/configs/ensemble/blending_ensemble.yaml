@@ -1,0 +1,39 @@
+# Blending Ensemble Configuration
+# Similar to stacking but uses holdout validation set
+
+ensemble_type: blending
+
+# Base models
+base_models:
+  - outputs/models/xgboost_best.joblib
+  - outputs/models/lightgbm_best.joblib
+  - outputs/models/random_forest_best.joblib
+
+# Meta-learner configuration
+meta_learner:
+  type: ridge
+  params:
+    alpha: 0.5
+    fit_intercept: true
+    random_state: 42
+
+# Fraction of data to use for blending
+blend_split: 0.3
+
+# Model selection criteria
+selection:
+  min_performance: 0.70
+  max_models: 5
+  min_diversity: 0.12
+
+# Diversity threshold
+diversity_threshold: 0.12
+
+# Output configuration
+output_dir: outputs/models/ensembles
+model_name: blending_ensemble
+version: "1.0.0"
+description: "Blending ensemble with Ridge meta-learner"
+
+# Random seed
+random_state: 42

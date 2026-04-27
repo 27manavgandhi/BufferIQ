@@ -1,0 +1,53 @@
+# Production Ensemble Configuration
+# Optimized configuration for production deployment
+
+ensemble_type: stacking  # Based on benchmarks, stacking performs best
+
+# Best performing base models (validated in training)
+base_models:
+  - outputs/models/xgboost_best.joblib
+  - outputs/models/lightgbm_best.joblib
+  - outputs/models/random_forest_best.joblib
+
+# Meta-learner: Ridge with tuned alpha
+meta_learner:
+  type: ridge
+  params:
+    alpha: 1.0
+    fit_intercept: true
+    normalize: false
+    random_state: 42
+
+# Cross-validation settings
+cv_folds: 5
+passthrough: false
+
+# Strict model selection criteria for production
+selection:
+  min_performance: 0.75  # Higher threshold for production
+  max_models: 3          # Limit to top 3 for efficiency
+  min_diversity: 0.20    # Ensure good diversity
+
+# Diversity threshold
+diversity_threshold: 0.20
+
+# Output configuration
+output_dir: outputs/models/ensembles/production
+model_name: production_ensemble
+version: "2.0.0"
+description: "Production-ready stacking ensemble - validated R² ≥ 0.83"
+
+# Metadata for production tracking
+metadata:
+  training_date: "2026-04-25"
+  trained_by: "BufferIQ ML Pipeline"
+  target_metric: "R² ≥ 0.83"
+  platforms:
+    - linkedin
+    - twitter
+    - bluesky
+  validation_status: "passed"
+  approved_for_production: true
+
+# Random seed
+random_state: 42
