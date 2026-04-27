@@ -1,10 +1,9 @@
 """Advanced visualizations for Optuna optimization."""
 
 from pathlib import Path
-from typing import List, Optional
+from typing import Optional
 
 import optuna
-import plotly.graph_objects as go
 
 from bufferiq.core.logging import get_logger
 
@@ -14,7 +13,7 @@ logger = get_logger(__name__)
 class AdvancedOptimizationVisualizer:
     """
     Create advanced visualizations for Optuna studies.
-    
+
     Provides optimization history, parameter importance, Pareto fronts,
     and other insightful plots.
     """
@@ -22,10 +21,10 @@ class AdvancedOptimizationVisualizer:
     def __init__(self, study: optuna.Study):
         """
         Initialize visualizer.
-        
+
         Args:
             study: Completed Optuna study
-        
+
         Example:
             >>> visualizer = AdvancedOptimizationVisualizer(study)
             >>> visualizer.plot_optimization_history('history.html')
@@ -36,7 +35,7 @@ class AdvancedOptimizationVisualizer:
     def plot_optimization_history(self, save_path: Path) -> None:
         """
         Plot optimization history (score vs trial number).
-        
+
         Args:
             save_path: Path to save HTML file
         """
@@ -51,7 +50,7 @@ class AdvancedOptimizationVisualizer:
     ) -> None:
         """
         Plot parameter importances.
-        
+
         Args:
             save_path: Path to save HTML file
             target: Target objective index (for multi-objective)
@@ -69,11 +68,11 @@ class AdvancedOptimizationVisualizer:
     def plot_parallel_coordinate(
         self,
         save_path: Path,
-        params: Optional[List[str]] = None,
+        params: Optional[list[str]] = None,
     ) -> None:
         """
         Plot parallel coordinate plot.
-        
+
         Args:
             save_path: Path to save HTML file
             params: List of parameters to include (None for all)
@@ -88,11 +87,11 @@ class AdvancedOptimizationVisualizer:
     def plot_contour(
         self,
         save_path: Path,
-        params: Optional[List[str]] = None,
+        params: Optional[list[str]] = None,
     ) -> None:
         """
         Plot contour plot for parameter interactions.
-        
+
         Args:
             save_path: Path to save HTML file
             params: List of 2 parameters to plot (None for auto-select)
@@ -110,11 +109,11 @@ class AdvancedOptimizationVisualizer:
     def plot_slice(
         self,
         save_path: Path,
-        params: Optional[List[str]] = None,
+        params: Optional[list[str]] = None,
     ) -> None:
         """
         Plot slice plot showing parameter effects.
-        
+
         Args:
             save_path: Path to save HTML file
             params: List of parameters to include (None for all)
@@ -129,7 +128,7 @@ class AdvancedOptimizationVisualizer:
     def plot_edf(self, save_path: Path) -> None:
         """
         Plot empirical distribution function.
-        
+
         Args:
             save_path: Path to save HTML file
         """
@@ -140,7 +139,7 @@ class AdvancedOptimizationVisualizer:
     def plot_timeline(self, save_path: Path) -> None:
         """
         Plot timeline of trials.
-        
+
         Args:
             save_path: Path to save HTML file
         """
@@ -151,12 +150,12 @@ class AdvancedOptimizationVisualizer:
     def create_all_visualizations(self, output_dir: Path) -> None:
         """
         Create all available visualizations.
-        
+
         Args:
             output_dir: Directory to save all plots
         """
         output_dir.mkdir(parents=True, exist_ok=True)
-        
+
         self.plot_optimization_history(output_dir / "optimization_history.html")
         self.plot_param_importances(output_dir / "param_importances.html")
         self.plot_parallel_coordinate(output_dir / "parallel_coordinate.html")
@@ -164,5 +163,5 @@ class AdvancedOptimizationVisualizer:
         self.plot_slice(output_dir / "slice.html")
         self.plot_edf(output_dir / "edf.html")
         self.plot_timeline(output_dir / "timeline.html")
-        
+
         logger.info(f"All visualizations saved to {output_dir}")
