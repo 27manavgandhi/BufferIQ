@@ -2,7 +2,7 @@
 # PHONY
 # =========================
 .PHONY: help setup install setup-db migrate migration db-upgrade db-downgrade db-reset db-init \
-test test-cov test-features test-training test-trainers test-evaluation test-ml test-optimization \
+test test-cov test-features test-training test-trainers test-evaluation test-ml test-optimization test-ensemble \
 lint format type-check validate quality clean \
 run docker-build docker-up docker-down docker-logs docker-test \
 extract-features list-features \
@@ -12,6 +12,7 @@ run-sync run-analysis \
 optimize-grid optimize-random optimize-bayesian optimize-model \
 optimize-optuna optimize-optuna-pruned optimize-multi-objective optimize-parallel \
 resume-study analyze-importance optuna-dashboard list-studies advanced-optimize \
+ensemble-voting ensemble-stacking ensemble-auto ensemble-analyze-diversity ensemble-compare ensemble-build-production ensemble-all \
 sync-initial sync-incremental sync-status sync-history \
 dev-setup ml-pipeline
 
@@ -21,35 +22,6 @@ dev-setup ml-pipeline
 help:
 	@echo "BufferIQ Development Commands"
 	@echo "=============================="
-	@echo ""
-	@echo "Setup:"
-	@echo "  make install          Install dependencies"
-	@echo "  make setup            Full project setup"
-	@echo "  make setup-db         Initialize database"
-	@echo "  make migrate          Run migrations"
-	@echo ""
-	@echo "Testing:"
-	@echo "  make test             Run tests"
-	@echo "  make test-cov         Coverage tests"
-	@echo "  make test-training    Training tests"
-	@echo "  make test-trainers    Trainer tests"
-	@echo "  make test-evaluation  Evaluation tests"
-	@echo "  make test-ml          ML tests"
-	@echo ""
-	@echo "ML Pipeline:"
-	@echo "  make run-sync         Sync data"
-	@echo "  make run-analysis     EDA"
-	@echo "  make extract-features Feature extraction"
-	@echo "  make train-model      Train model"
-	@echo "  make evaluate-model   Evaluate model"
-	@echo ""
-	@echo "Optimization:"
-	@echo "  make optimize-optuna  Optuna optimization"
-	@echo "  make optimize-grid    Grid search"
-	@echo "  make optimize-random  Random search"
-	@echo ""
-	@echo "Utilities:"
-	@echo "  make clean            Cleanup"
 
 # =========================
 # SETUP
@@ -63,6 +35,7 @@ setup:
 	python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('averaged_perceptron_tagger')"
 	mkdir -p outputs/models/checkpoints outputs/models/registry outputs/experiments outputs/features
 	mkdir -p outputs/evaluations/reports outputs/evaluations/residual_plots outputs/evaluations/feature_importance
+	mkdir -p outputs/models/ensembles outputs/ensembles
 	@echo "Setup complete!"
 
 install:
@@ -120,17 +93,19 @@ test-ml:
 test-optimization:
 	cd backend && pytest tests/ml/optimization/ -v
 
+test-ensemble:
+	@echo "Running ensemble tests..."
+	cd backend && pytest tests/test_ensemble*.py -v --tb=short
+
 # =========================
 # CODE QUALITY
 # =========================
 lint:
-	cd backend && ruff bufferiq/
-	cd backend && ruff tests/
+	cd backend && ruff bufferiq/ tests/
 
 format:
 	cd backend && black bufferiq/ tests/
-	cd backend && ruff bufferiq/ --fix
-	cd backend && ruff tests/ --fix
+	cd backend && ruff bufferiq/ tests/ --fix
 
 type-check:
 	cd backend && mypy bufferiq/ --strict
@@ -196,61 +171,73 @@ compare-models:
 	cd backend && python -m bufferiq.cli.evaluate compare-all
 
 # =========================
+# ENSEMBLE (DAY 13)
+# =========================
+ensemble-voting:
+	@echo "Building voting ensemble..."
+	cd backend && python -m bufferiq.cli.ensemble voting \
+		--models outputs/models/xgboost_best.joblib \
+		         outputs/models/lightgbm_best.joblib \
+		         outputs/models/random_forest_best.joblib \
+		--train-data data/processed/train.npz \
+		--output outputs/models/ensembles/voting_ensemble.joblib
+
+ensemble-stacking:
+	@echo "Building stacking ensemble..."
+	cd backend && python -m bufferiq.cli.ensemble stacking \
+		--models outputs/models/xgboost_best.joblib \
+		         outputs/models/lightgbm_best.joblib \
+		         outputs/models/random_forest_best.joblib \
+		--train-data data/processed/train.npz \
+		--cv 5 \
+		--output outputs/models/ensembles/stacking_ensemble.joblib
+
+ensemble-auto:
+	@echo "Auto-building best ensemble..."
+	cd backend && python -m bufferiq.cli.ensemble auto \
+		--models outputs/models/xgboost_best.joblib \
+		         outputs/models/lightgbm_best.joblib \
+		         outputs/models/random_forest_best.joblib \
+		--train-data data/processed/train.npz \
+		--val-data data/processed/val.npz \
+		--output outputs/models/ensembles/auto_ensemble.joblib
+
+ensemble-analyze-diversity:
+	@echo "Analyzing model diversity..."
+	cd backend && python -m bufferiq.cli.ensemble analyze-diversity \
+		--models outputs/models/xgboost_best.joblib \
+		         outputs/models/lightgbm_best.joblib \
+		         outputs/models/random_forest_best.joblib \
+		--val-data data/processed/val.npz \
+		--output-dir outputs/ensembles/diversity
+
+ensemble-compare:
+	@echo "Comparing ensemble performance..."
+	cd backend && python -m bufferiq.cli.ensemble compare \
+		--ensemble outputs/models/ensembles/stacking_ensemble.joblib \
+		--models outputs/models/xgboost_best.joblib \
+		         outputs/models/lightgbm_best.joblib \
+		         outputs/models/random_forest_best.joblib \
+		--test-data data/processed/test.npz \
+		--output-dir outputs/ensembles/comparison
+
+ensemble-build-production:
+	@echo "Building production ensemble..."
+	cd backend && python scripts/build_ensemble.py \
+		--config configs/ensemble/production_ensemble.yaml \
+		--train-data data/processed/train.npz \
+		--val-data data/processed/val.npz \
+		--test-data data/processed/test.npz \
+		--output-dir outputs/models/ensembles/production
+
+ensemble-all: ensemble-analyze-diversity ensemble-auto ensemble-compare
+	@echo "Complete ensemble pipeline finished!"
+
+# =========================
 # OPTIMIZATION
 # =========================
-optimize-grid:
-	cd backend && python -m bufferiq.cli.optimize run --config configs/optimization/xgboost_grid.yaml
-
-optimize-random:
-	cd backend && python -m bufferiq.cli.optimize run --config configs/optimization/xgboost_random.yaml
-
-optimize-bayesian:
-	cd backend && python -m bufferiq.cli.optimize run --config configs/optimization/xgboost_bayesian.yaml
-
-optimize-model:
-	cd backend && python scripts/optimize_model.py --config configs/optimization/xgboost_grid.yaml
-
 optimize-optuna:
 	cd backend && python -m bufferiq.cli.optimize optuna --config configs/optimization/xgboost_optuna.yaml
-
-optimize-optuna-pruned:
-	cd backend && python -m bufferiq.cli.optimize optuna --config configs/optimization/xgboost_optuna_pruned.yaml
-
-optimize-multi-objective:
-	cd backend && python -m bufferiq.cli.optimize multi-objective --config configs/optimization/xgboost_multi_objective.yaml
-
-optimize-parallel:
-	cd backend && python -m bufferiq.cli.optimize parallel --config configs/optimization/parallel_optimization.yaml
-
-resume-study:
-	cd backend && python -m bufferiq.cli.optimize resume --study-name $(STUDY_NAME) --n-trials 50
-
-analyze-importance:
-	cd backend && python -m bufferiq.cli.optimize importance --study-name $(STUDY_NAME)
-
-optuna-dashboard:
-	optuna-dashboard sqlite:///outputs/optimizations/optuna_studies/xgboost_001.db
-
-list-studies:
-	cd backend && python -m bufferiq.cli.optimize list-studies
-
-advanced-optimize:
-	cd backend && python scripts/advanced_optimize.py --config configs/optimization/xgboost_optuna.yaml --mode optuna
-
-# =========================
-# SYNC COMMANDS (LEGACY)
-# =========================
-sync-initial:
-	cd backend && python -m bufferiq.cli.sync initial --user-id=$(USER_ID)
-
-sync-incremental:
-	cd backend && python -m bufferiq.cli.sync incremental --user-id=$(USER_ID)
-
-sync-status:
-	cd backend && python -m bufferiq.cli.sync status --user-id=$(USER_ID)
-
-sync-history:
-	cd backend && python -m bufferiq.cli.sync history --user-id=$(USER_ID)
 
 # =========================
 # WORKFLOWS
@@ -258,8 +245,8 @@ sync-history:
 dev-setup: install setup-db migrate
 	@echo "Development ready!"
 
-ml-pipeline: run-sync run-analysis extract-features train-model evaluate-model optimize-optuna
-	@echo "ML pipeline complete!"
+ml-pipeline: run-sync run-analysis extract-features train-model evaluate-model optimize-optuna ensemble-auto
+	@echo "Full ML pipeline complete!"
 
 # =========================
 # CLEANUP
