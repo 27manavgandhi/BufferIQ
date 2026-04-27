@@ -2,7 +2,7 @@
 
 import json
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any, Optional
 
 import optuna
 from optuna.pruners import BasePruner
@@ -16,7 +16,7 @@ logger = get_logger(__name__)
 class OptunaStudyManager:
     """
     Manage Optuna studies with persistence.
-    
+
     Provides CRUD operations for studies, including creation,
     loading, deletion, and export.
     """
@@ -24,10 +24,10 @@ class OptunaStudyManager:
     def __init__(self, storage: str = "sqlite:///optuna_studies.db"):
         """
         Initialize study manager.
-        
+
         Args:
             storage: Storage URL (SQLite or PostgreSQL)
-        
+
         Example:
             >>> manager = OptunaStudyManager("sqlite:///my_studies.db")
             >>> study = manager.create_study("my_study", direction="maximize")
@@ -44,19 +44,19 @@ class OptunaStudyManager:
     ) -> optuna.Study:
         """
         Create new study.
-        
+
         Args:
             study_name: Name for the study
             direction: Optimization direction ('maximize' or 'minimize')
             sampler: Optuna sampler
             pruner: Optuna pruner
-        
+
         Returns:
             Created study object
-        
+
         Raises:
             ValueError: If study already exists
-        
+
         Example:
             >>> study = manager.create_study("xgboost_optimization", direction="maximize")
         """
@@ -71,23 +71,23 @@ class OptunaStudyManager:
             )
             logger.info(f"Created study: {study_name}")
             return study
-            
+
         except optuna.exceptions.DuplicatedStudyError:
             raise ValueError(f"Study '{study_name}' already exists")
 
     def load_study(self, study_name: str) -> optuna.Study:
         """
         Load existing study.
-        
+
         Args:
             study_name: Name of study to load
-        
+
         Returns:
             Loaded study object
-        
+
         Raises:
             ValueError: If study not found
-        
+
         Example:
             >>> study = manager.load_study("xgboost_optimization")
             >>> print(f"Loaded study with {len(study.trials)} trials")
@@ -99,17 +99,17 @@ class OptunaStudyManager:
             )
             logger.info(f"Loaded study: {study_name} ({len(study.trials)} trials)")
             return study
-            
+
         except KeyError:
             raise ValueError(f"Study '{study_name}' not found")
 
-    def list_studies(self) -> List[str]:
+    def list_studies(self) -> list[str]:
         """
         List all study names.
-        
+
         Returns:
             List of study names
-        
+
         Example:
             >>> studies = manager.list_studies()
             >>> print(f"Found {len(studies)} studies")
@@ -125,10 +125,10 @@ class OptunaStudyManager:
     def delete_study(self, study_name: str) -> None:
         """
         Delete study.
-        
+
         Args:
             study_name: Name of study to delete
-        
+
         Example:
             >>> manager.delete_study("old_study")
         """
@@ -144,16 +144,16 @@ class OptunaStudyManager:
     def export_study(self, study_name: str, output_path: Path) -> None:
         """
         Export study data to JSON.
-        
+
         Args:
             study_name: Name of study to export
             output_path: Path to save JSON file
-        
+
         Example:
             >>> manager.export_study("my_study", Path("study_export.json"))
         """
         study = self.load_study(study_name)
-        
+
         data = {
             "study_name": study.study_name,
             "direction": study.direction.name,
@@ -176,37 +176,34 @@ class OptunaStudyManager:
                 for t in study.trials
             ],
         }
-        
+
         with open(output_path, "w") as f:
             json.dump(data, f, indent=2)
-        
+
         logger.info(f"Exported study to {output_path}")
 
-    def get_study_summary(self, study_name: str) -> Dict[str, Any]:
+    def get_study_summary(self, study_name: str) -> dict[str, Any]:
         """
         Get summary of study.
-        
+
         Args:
             study_name: Name of study
-        
+
         Returns:
             Dictionary with study summary
         """
         study = self.load_study(study_name)
-        
-        n_complete = len([
-            t for t in study.trials
-            if t.state == optuna.trial.TrialState.COMPLETE
-        ])
-        n_pruned = len([
-            t for t in study.trials
-            if t.state == optuna.trial.TrialState.PRUNED
-        ])
-        n_failed = len([
-            t for t in study.trials
-            if t.state == optuna.trial.TrialState.FAIL
-        ])
-        
+
+        n_complete = len(
+            [t for t in study.trials if t.state == optuna.trial.TrialState.COMPLETE]
+        )
+        n_pruned = len(
+            [t for t in study.trials if t.state == optuna.trial.TrialState.PRUNED]
+        )
+        n_failed = len(
+            [t for t in study.trials if t.state == optuna.trial.TrialState.FAIL]
+        )
+
         return {
             "study_name": study.study_name,
             "direction": study.direction.name,
