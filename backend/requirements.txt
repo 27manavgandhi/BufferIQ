@@ -114,3 +114,9 @@ lightgbm==4.1.0
 optuna>=3.5.0           # Optuna hyperparameter optimization framework
 optuna-dashboard>=0.14.0  # Optional: Web-based Optuna dashboard
 plotly>=5.18.0
+
+# Existing dependencies...
+
+# Ensemble models (Day 13)
+mlxtend>=0.23.0  # For ensemble utilities
+scipy>=1.11.0    # For statistical tests
