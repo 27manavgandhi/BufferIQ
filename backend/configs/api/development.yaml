@@ -1,0 +1,54 @@
+# Development API Configuration
+
+app:
+  name: "BufferIQ API"
+  version: "1.0.0"
+  debug: true
+  host: "127.0.0.1"
+  port: 8000
+  workers: 1
+  reload: true
+
+models:
+  default_version: "latest"
+  cache_size: 3
+  warmup_on_startup: true
+  model_paths:
+    xgboost: "outputs/models/xgboost_best.joblib"
+    lightgbm: "outputs/models/lightgbm_best.joblib"
+    random_forest: "outputs/models/random_forest_best.joblib"
+    ensemble: "outputs/models/ensembles/production_ensemble.joblib"
+
+cache:
+  enabled: true
+  backend: "redis"
+  host: "localhost"
+  port: 6379
+  db: 0
+  ttl: 3600  # 1 hour
+  max_size: 1000
+
+rate_limit:
+  enabled: true
+  requests_per_minute: 60
+  burst: 10
+
+cors:
+  enabled: true
+  origins:
+    - "http://localhost:3000"
+    - "http://localhost:8000"
+  methods:
+    - "GET"
+    - "POST"
+  headers:
+    - "*"
+
+logging:
+  level: "DEBUG"
+  format: "json"
+  output: "outputs/api/logs/dev.log"
+
+monitoring:
+  prometheus_enabled: true
+  metrics_path: "/metrics"

@@ -1,0 +1,59 @@
+# Production API Configuration
+
+app:
+  name: "BufferIQ API"
+  version: "1.0.0"
+  debug: false
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  reload: false
+
+models:
+  default_version: "production"
+  cache_size: 5
+  warmup_on_startup: true
+  model_paths:
+    xgboost: "outputs/models/registry/xgboost_v1.2.0.joblib"
+    lightgbm: "outputs/models/registry/lightgbm_v1.2.0.joblib"
+    random_forest: "outputs/models/registry/random_forest_v1.2.0.joblib"
+    ensemble: "outputs/models/ensembles/production_v2.0.0.joblib"
+
+cache:
+  enabled: true
+  backend: "redis"
+  host: "redis"  # Docker service name
+  port: 6379
+  db: 0
+  ttl: 7200  # 2 hours
+  max_size: 10000
+
+rate_limit:
+  enabled: true
+  requests_per_minute: 1000
+  burst: 100
+
+cors:
+  enabled: true
+  origins:
+    - "https://bufferiq.com"
+    - "https://app.bufferiq.com"
+  methods:
+    - "GET"
+    - "POST"
+  headers:
+    - "Authorization"
+    - "Content-Type"
+
+logging:
+  level: "INFO"
+  format: "json"
+  output: "stdout"
+
+monitoring:
+  prometheus_enabled: true
+  metrics_path: "/metrics"
+  
+security:
+  api_key_required: true
+  rate_limit_by_api_key: true

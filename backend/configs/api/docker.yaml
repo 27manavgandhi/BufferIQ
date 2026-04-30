@@ -1,0 +1,53 @@
+# Docker API Configuration
+
+app:
+  name: "BufferIQ API"
+  version: "1.0.0"
+  debug: false
+  host: "0.0.0.0"
+  port: 8000
+  workers: 4
+  reload: false
+
+models:
+  default_version: "latest"
+  cache_size: 5
+  warmup_on_startup: true
+  model_paths:
+    xgboost: "/app/models/xgboost_best.joblib"
+    lightgbm: "/app/models/lightgbm_best.joblib"
+    random_forest: "/app/models/random_forest_best.joblib"
+    ensemble: "/app/models/ensemble_production.joblib"
+
+cache:
+  enabled: true
+  backend: "redis"
+  host: "redis"
+  port: 6379
+  db: 0
+  ttl: 3600
+  max_size: 5000
+
+rate_limit:
+  enabled: true
+  requests_per_minute: 500
+  burst: 50
+
+cors:
+  enabled: true
+  origins:
+    - "*"
+  methods:
+    - "GET"
+    - "POST"
+  headers:
+    - "*"
+
+logging:
+  level: "INFO"
+  format: "json"
+  output: "stdout"
+
+monitoring:
+  prometheus_enabled: true
+  metrics_path: "/metrics"

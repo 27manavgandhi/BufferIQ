@@ -1,0 +1,45 @@
+# Testing API Configuration
+
+app:
+  name: "BufferIQ API - Test"
+  version: "1.0.0"
+  debug: true
+  host: "127.0.0.1"
+  port: 8001
+  workers: 1
+  reload: false
+
+models:
+  default_version: "test"
+  cache_size: 2
+  warmup_on_startup: false
+  model_paths:
+    xgboost: "outputs/models/test/xgboost_test.joblib"
+    lightgbm: "outputs/models/test/lightgbm_test.joblib"
+    ensemble: "outputs/models/test/ensemble_test.joblib"
+
+cache:
+  enabled: false
+  backend: "memory"
+  ttl: 300
+  max_size: 100
+
+rate_limit:
+  enabled: false
+
+cors:
+  enabled: true
+  origins:
+    - "*"
+  methods:
+    - "*"
+  headers:
+    - "*"
+
+logging:
+  level: "DEBUG"
+  format: "text"
+  output: "outputs/api/logs/test.log"
+
+monitoring:
+  prometheus_enabled: false
