@@ -1,3 +1,6 @@
-"""API layer containing REST endpoints and request/response models."""
+"""BufferIQ Production API."""
 
-__all__: list[str] = []
+from bufferiq.api.app import app
+
+__version__ = "1.0.0"
+__all__ = ["app"]
