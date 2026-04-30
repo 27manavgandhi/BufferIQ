@@ -174,3 +174,11 @@ alembic/versions/__pycache__/
 # Ensemble outputs (Day 13)
 outputs/ensembles/
 outputs/models/ensembles/
+
+# Existing entries...
+
+# Day 14: API outputs
+outputs/api/
+outputs/api/logs/
+outputs/api/metrics/
+outputs/api/cache/
