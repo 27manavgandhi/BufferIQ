@@ -13,6 +13,7 @@ optimize-grid optimize-random optimize-bayesian optimize-model \
 optimize-optuna optimize-optuna-pruned optimize-multi-objective optimize-parallel \
 resume-study analyze-importance optuna-dashboard list-studies advanced-optimize \
 ensemble-voting ensemble-stacking ensemble-auto ensemble-analyze-diversity ensemble-compare ensemble-build-production ensemble-all \
+api-dev api-prod api-test api-benchmark api-load-test api-docker-build api-docker-run api-docker-stop test-api-all \
 sync-initial sync-incremental sync-status sync-history \
 dev-setup ml-pipeline
 
@@ -21,7 +22,6 @@ dev-setup ml-pipeline
 # =========================
 help:
 	@echo "BufferIQ Development Commands"
-	@echo "=============================="
 
 # =========================
 # SETUP
@@ -94,7 +94,6 @@ test-optimization:
 	cd backend && pytest tests/ml/optimization/ -v
 
 test-ensemble:
-	@echo "Running ensemble tests..."
 	cd backend && pytest tests/test_ensemble*.py -v --tb=short
 
 # =========================
@@ -171,82 +170,62 @@ compare-models:
 	cd backend && python -m bufferiq.cli.evaluate compare-all
 
 # =========================
-# ENSEMBLE (DAY 13)
+# ENSEMBLE
 # =========================
 ensemble-voting:
-	@echo "Building voting ensemble..."
-	cd backend && python -m bufferiq.cli.ensemble voting \
-		--models outputs/models/xgboost_best.joblib \
-		         outputs/models/lightgbm_best.joblib \
-		         outputs/models/random_forest_best.joblib \
-		--train-data data/processed/train.npz \
-		--output outputs/models/ensembles/voting_ensemble.joblib
+	cd backend && python -m bufferiq.cli.ensemble voting --models outputs/models/xgboost_best.joblib outputs/models/lightgbm_best.joblib outputs/models/random_forest_best.joblib --train-data data/processed/train.npz --output outputs/models/ensembles/voting_ensemble.joblib
 
 ensemble-stacking:
-	@echo "Building stacking ensemble..."
-	cd backend && python -m bufferiq.cli.ensemble stacking \
-		--models outputs/models/xgboost_best.joblib \
-		         outputs/models/lightgbm_best.joblib \
-		         outputs/models/random_forest_best.joblib \
-		--train-data data/processed/train.npz \
-		--cv 5 \
-		--output outputs/models/ensembles/stacking_ensemble.joblib
+	cd backend && python -m bufferiq.cli.ensemble stacking --models outputs/models/xgboost_best.joblib outputs/models/lightgbm_best.joblib outputs/models/random_forest_best.joblib --train-data data/processed/train.npz --cv 5 --output outputs/models/ensembles/stacking_ensemble.joblib
 
 ensemble-auto:
-	@echo "Auto-building best ensemble..."
-	cd backend && python -m bufferiq.cli.ensemble auto \
-		--models outputs/models/xgboost_best.joblib \
-		         outputs/models/lightgbm_best.joblib \
-		         outputs/models/random_forest_best.joblib \
-		--train-data data/processed/train.npz \
-		--val-data data/processed/val.npz \
-		--output outputs/models/ensembles/auto_ensemble.joblib
+	cd backend && python -m bufferiq.cli.ensemble auto --models outputs/models/xgboost_best.joblib outputs/models/lightgbm_best.joblib outputs/models/random_forest_best.joblib --train-data data/processed/train.npz --val-data data/processed/val.npz --output outputs/models/ensembles/auto_ensemble.joblib
 
 ensemble-analyze-diversity:
-	@echo "Analyzing model diversity..."
-	cd backend && python -m bufferiq.cli.ensemble analyze-diversity \
-		--models outputs/models/xgboost_best.joblib \
-		         outputs/models/lightgbm_best.joblib \
-		         outputs/models/random_forest_best.joblib \
-		--val-data data/processed/val.npz \
-		--output-dir outputs/ensembles/diversity
+	cd backend && python -m bufferiq.cli.ensemble analyze-diversity --models outputs/models/xgboost_best.joblib outputs/models/lightgbm_best.joblib outputs/models/random_forest_best.joblib --val-data data/processed/val.npz --output-dir outputs/ensembles/diversity
 
 ensemble-compare:
-	@echo "Comparing ensemble performance..."
-	cd backend && python -m bufferiq.cli.ensemble compare \
-		--ensemble outputs/models/ensembles/stacking_ensemble.joblib \
-		--models outputs/models/xgboost_best.joblib \
-		         outputs/models/lightgbm_best.joblib \
-		         outputs/models/random_forest_best.joblib \
-		--test-data data/processed/test.npz \
-		--output-dir outputs/ensembles/comparison
+	cd backend && python -m bufferiq.cli.ensemble compare --ensemble outputs/models/ensembles/stacking_ensemble.joblib --models outputs/models/xgboost_best.joblib outputs/models/lightgbm_best.joblib outputs/models/random_forest_best.joblib --test-data data/processed/test.npz --output-dir outputs/ensembles/comparison
 
 ensemble-build-production:
-	@echo "Building production ensemble..."
-	cd backend && python scripts/build_ensemble.py \
-		--config configs/ensemble/production_ensemble.yaml \
-		--train-data data/processed/train.npz \
-		--val-data data/processed/val.npz \
-		--test-data data/processed/test.npz \
-		--output-dir outputs/models/ensembles/production
+	cd backend && python scripts/build_ensemble.py --config configs/ensemble/production_ensemble.yaml --train-data data/processed/train.npz --val-data data/processed/val.npz --test-data data/processed/test.npz --output-dir outputs/models/ensembles/production
 
 ensemble-all: ensemble-analyze-diversity ensemble-auto ensemble-compare
-	@echo "Complete ensemble pipeline finished!"
 
 # =========================
-# OPTIMIZATION
+# API (DAY 14)
 # =========================
-optimize-optuna:
-	cd backend && python -m bufferiq.cli.optimize optuna --config configs/optimization/xgboost_optuna.yaml
+api-dev:
+	cd backend && python scripts/start_api.py --config configs/api/development.yaml --reload
+
+api-prod:
+	cd backend && python scripts/start_api.py --config configs/api/production.yaml
+
+api-test:
+	pytest backend/tests/api/ -v --cov=bufferiq/api --cov-report=term-missing --cov-fail-under=90
+
+api-benchmark:
+	cd backend && python scripts/benchmark_api.py --url http://localhost:8000 --requests 100
+
+api-load-test:
+	cd backend && python scripts/load_test.py --url http://localhost:8000 --users 10 --duration 60
+
+api-docker-build:
+	docker build -t bufferiq-api:latest -f backend/Dockerfile backend/
+
+api-docker-run:
+	docker-compose -f docker-compose.yml up -d
+
+api-docker-stop:
+	docker-compose -f docker-compose.yml down
+
+test-api-all: api-test
 
 # =========================
 # WORKFLOWS
 # =========================
 dev-setup: install setup-db migrate
-	@echo "Development ready!"
-
 ml-pipeline: run-sync run-analysis extract-features train-model evaluate-model optimize-optuna ensemble-auto
-	@echo "Full ML pipeline complete!"
 
 # =========================
 # CLEANUP
