@@ -1,0 +1,65 @@
+# Content Intelligence - Production Configuration
+
+# Text Preprocessing
+preprocessing:
+  remove_urls: true
+  remove_mentions: false
+  remove_hashtags: false
+  lowercase: false
+
+# Sentiment Analysis
+sentiment:
+  model: "vader"
+  confidence_threshold: 0.7
+
+# Topic Modeling
+topic_modeling:
+  method: "nmf"
+  n_topics: 15
+  max_features: 10000
+  min_df: 3
+  max_df: 0.90
+
+# Readability Analysis
+readability:
+  min_text_length: 10
+  enable_all_metrics: true
+
+# Quality Checking
+quality:
+  enable_grammar_check: true
+  enable_link_validation: true
+  language: "en-US"
+
+# Content Optimization
+optimization:
+  enable_suggestions: true
+  max_suggestions: 10
+  confidence_threshold: 0.6
+
+# Diversity Analysis
+diversity:
+  window_days: 30
+  enable_topic_diversity: true
+  enable_temporal_diversity: true
+
+# Platform Settings
+platforms:
+  linkedin:
+    ideal_length: [150, 250]
+    max_length: 3000
+    ideal_hashtags: [3, 5]
+  twitter:
+    ideal_length: [100, 200]
+    max_length: 280
+    ideal_hashtags: [1, 3]
+  bluesky:
+    ideal_length: [100, 200]
+    max_length: 300
+    ideal_hashtags: [1, 3]
+
+# Performance
+performance:
+  cache_enabled: true
+  cache_ttl: 7200
+  max_batch_size: 50
