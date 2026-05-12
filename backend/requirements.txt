@@ -136,3 +136,10 @@ prophet==1.1.5
 statsmodels==0.14.1 
 calplot==0.1.7 
 scipy==1.11.4
+
+
+textblob==0.17.1
+vaderSentiment==3.3.2
+language-tool-python==2.7.1
+langdetect==1.0.9
+emoji==2.8.0
