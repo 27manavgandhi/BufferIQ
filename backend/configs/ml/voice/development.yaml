@@ -1,0 +1,61 @@
+# Voice Analysis - Development Configuration
+
+voice:
+  # Extraction settings
+  extraction:
+    default_lookback_days: 90
+    min_posts_required: 20
+    max_posts_to_analyze: 500
+    
+  # Consistency scoring
+  consistency:
+    threshold: 75.0
+    lexical_weight: 0.30
+    syntactic_weight: 0.30
+    stylistic_weight: 0.40
+    
+  # Drift detection
+  drift:
+    detection_threshold: 0.15  # 15% deviation
+    significance_level: 0.05
+    default_window_days: 30
+    default_baseline_days: 90
+    
+  # Recommendations
+  recommendations:
+    max_recommendations: 10
+    min_impact_score: 5.0
+    
+  # Validation
+  validation:
+    auto_approve_threshold: 85.0
+    auto_reject_threshold: 50.0
+    require_manual_review: false
+    
+  # Quality gates
+  quality_gates:
+    enabled: true
+    strict_mode: false
+    
+  # Caching
+  cache:
+    enabled: true
+    ttl_seconds: 3600
+    max_cache_size: 1000
+    
+  # Performance
+  performance:
+    max_batch_size: 50
+    analysis_timeout_seconds: 30
+    extraction_timeout_seconds: 120
+
+# Supported platforms
+platforms:
+  - linkedin
+  - twitter
+  - bluesky
+
+# Logging
+logging:
+  level: DEBUG
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
