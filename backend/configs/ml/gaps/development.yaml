@@ -1,0 +1,68 @@
+# Gap Analysis Configuration - Development
+
+environment: development
+
+gap_analysis:
+  min_topic_posts: 3
+  max_topics: 50
+  similarity_threshold: 0.3
+  lookback_days_default: 90
+  
+topic_extraction:
+  ngram_range: [1, 3]
+  max_features: 1000
+  stop_words: english
+  
+coverage:
+  saturation_threshold: 20
+  balance_weight: 0.7
+  
+detection:
+  critical_threshold: 80
+  important_threshold: 60
+  moderate_threshold: 40
+  
+competitors:
+  max_competitors: 10
+  min_posts_required: 10
+  
+recommendations:
+  default_count: 20
+  max_count: 50
+  min_priority_score: 50
+  
+calendar:
+  max_weeks: 12
+  max_posts_per_week: 7
+  default_posting_time: "09:00"
+  
+serp:
+  difficulty_threshold: 70
+  opportunity_threshold: 60
+  
+benchmarking:
+  industry_averages:
+    technology:
+      engagement_rate: 0.048
+      posts_per_week: 3.5
+    marketing:
+      engagement_rate: 0.055
+      posts_per_week: 4.2
+      
+scoring:
+  weights:
+    competitor_coverage: 0.25
+    search_volume: 0.20
+    trend_momentum: 0.25
+    engagement_potential: 0.15
+    strategic_fit: 0.15
+    
+caching:
+  enabled: true
+  ttl_seconds: 3600
+  redis_host: localhost
+  redis_port: 6379
+  
+logging:
+  level: DEBUG
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
