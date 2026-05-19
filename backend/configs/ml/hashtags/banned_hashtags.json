@@ -1,0 +1,27 @@
+{
+  "banned": [
+    "spam",
+    "followback",
+    "followme",
+    "like4like",
+    "follow4follow",
+    "f4f",
+    "l4l",
+    "likeforlike",
+    "followforfollow",
+    "instagood",
+    "photooftheday",
+    "picoftheday"
+  ],
+  "nsfw": [
+    "nsfw",
+    "adult",
+    "xxx"
+  ],
+  "controversial": [
+    "political",
+    "religion"
+  ],
+  "version": "1.0",
+  "last_updated": "2024-01-15"
+}

@@ -1,0 +1,96 @@
+# Hashtag Intelligence - Development Configuration
+
+hashtag_intelligence:
+  # Extraction settings
+  extraction:
+    max_hashtags_per_post: 10
+    min_hashtag_length: 2
+    max_hashtag_length: 100
+    enable_variant_detection: true
+    
+  # Performance analysis
+  performance:
+    lookback_days: 90
+    min_sample_size: 10
+    confidence_threshold: 0.75
+    cache_ttl: 3600  # 1 hour
+    
+  # Trend detection
+  trends:
+    viral_threshold: 80.0
+    min_volume: 100
+    momentum_window_hours: 24
+    update_frequency_minutes: 15
+    
+  # Discovery
+  discovery:
+    max_related: 50
+    min_similarity: 0.3
+    min_cooccurrence: 5
+    niche_max_competition: 30.0
+    
+  # Strategy generation
+  strategy:
+    platforms:
+      linkedin:
+        min_hashtags: 3
+        max_hashtags: 5
+        optimal: 5
+        mix_ratio:
+          broad: 0.4
+          niche: 0.4
+          branded: 0.2
+      twitter:
+        min_hashtags: 1
+        max_hashtags: 2
+        optimal: 2
+        mix_ratio:
+          broad: 0.5
+          niche: 0.5
+          branded: 0.0
+      bluesky:
+        min_hashtags: 1
+        max_hashtags: 3
+        optimal: 2
+        mix_ratio:
+          broad: 0.5
+          niche: 0.5
+          branded: 0.0
+          
+  # Risk detection
+  risk:
+    banned_hashtags_file: "configs/ml/hashtags/banned_hashtags.json"
+    check_realtime: true
+    safety_threshold: 60.0
+    
+  # Effectiveness scoring
+  effectiveness:
+    weights:
+      engagement: 0.30
+      reach: 0.25
+      competition: 0.20
+      momentum: 0.15
+      roi: 0.10
+    normalization:
+      max_engagement: 500
+      max_reach: 50000
+      max_roi: 10
+      
+  # Lifecycle tracking
+  lifecycle:
+    dormant_threshold: 10
+    maturity_days: 90
+    decline_detection_window: 14
+    
+  # API settings
+  api:
+    rate_limit: 100  # requests per minute
+    cache_enabled: true
+    cache_ttl: 1800  # 30 minutes
+    batch_max_size: 20
+    
+  # Logging
+  logging:
+    level: DEBUG
+    format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
+    file: "logs/hashtags_dev.log"
