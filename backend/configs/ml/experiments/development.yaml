@@ -1,0 +1,62 @@
+# Development configuration for experiments
+
+experiments:
+  # Statistical parameters
+  default_alpha: 0.05
+  default_power: 0.80
+  default_mde: 0.10
+  default_confidence_level: 0.95
+
+  # Sample size
+  min_sample_size_per_variant: 100
+  max_sample_size_per_variant: 1000000
+
+  # Duration
+  min_duration_days: 7
+  max_duration_days: 90
+
+  # Sequential testing
+  sequential_testing:
+    enabled: true
+    max_looks: 5
+    spending_function: "obrien_fleming"
+
+  # Early stopping
+  early_stopping:
+    enabled: true
+    min_samples_before_stopping: 100
+    futility_threshold: 0.01
+
+  # Bandit algorithms
+  bandits:
+    thompson_sampling:
+      prior_alpha: 1.0
+      prior_beta: 1.0
+    ucb:
+      exploration_param: 2.0
+    epsilon_greedy:
+      epsilon: 0.1
+
+  # Monitoring
+  monitoring:
+    srm_alpha: 0.001
+    anomaly_z_threshold: 3.0
+    check_interval_seconds: 300
+
+  # Platforms
+  supported_platforms:
+    - linkedin
+    - twitter
+    - bluesky
+
+  # Metrics
+  supported_metrics:
+    - engagement_rate
+    - click_through_rate
+    - conversion_rate
+    - time_on_page
+    - revenue
+
+logging:
+  level: DEBUG
+  format: "%(asctime)s - %(name)s - %(levelname)s - %(message)s"
