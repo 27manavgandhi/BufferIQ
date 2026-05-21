@@ -1,0 +1,81 @@
+{
+  "experiment_types": {
+    "ab_test": {
+      "name": "A/B Test",
+      "description": "Simple two-variant test",
+      "min_variants": 2,
+      "max_variants": 2,
+      "default_traffic_split": [0.5, 0.5]
+    },
+    "multivariate": {
+      "name": "Multivariate Test",
+      "description": "Multiple variants test",
+      "min_variants": 3,
+      "max_variants": 10,
+      "default_traffic_split": "equal"
+    },
+    "sequential": {
+      "name": "Sequential Test",
+      "description": "Test with early stopping",
+      "min_variants": 2,
+      "max_variants": 5,
+      "default_traffic_split": "equal"
+    },
+    "bandit": {
+      "name": "Multi-Armed Bandit",
+      "description": "Adaptive test with Thompson Sampling",
+      "min_variants": 2,
+      "max_variants": 10,
+      "default_traffic_split": "adaptive"
+    }
+  },
+  "metric_types": {
+    "engagement_rate": {
+      "name": "Engagement Rate",
+      "type": "proportion",
+      "range": [0, 1],
+      "typical_baseline": 0.05
+    },
+    "click_through_rate": {
+      "name": "Click-Through Rate",
+      "type": "proportion",
+      "range": [0, 1],
+      "typical_baseline": 0.02
+    },
+    "conversion_rate": {
+      "name": "Conversion Rate",
+      "type": "proportion",
+      "range": [0, 1],
+      "typical_baseline": 0.01
+    },
+    "time_on_page": {
+      "name": "Time on Page",
+      "type": "continuous",
+      "range": [0, null],
+      "typical_baseline": 60
+    },
+    "revenue": {
+      "name": "Revenue",
+      "type": "continuous",
+      "range": [0, null],
+      "typical_baseline": 10
+    }
+  },
+  "platforms": {
+    "linkedin": {
+      "name": "LinkedIn",
+      "typical_traffic": 10000,
+      "typical_engagement": 0.05
+    },
+    "twitter": {
+      "name": "Twitter",
+      "typical_traffic": 50000,
+      "typical_engagement": 0.03
+    },
+    "bluesky": {
+      "name": "Bluesky",
+      "typical_traffic": 5000,
+      "typical_engagement": 0.04
+    }
+  }
+}
