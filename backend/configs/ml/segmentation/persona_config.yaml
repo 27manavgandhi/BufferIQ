@@ -1,0 +1,44 @@
+# Persona Generation Configuration for Day 22
+
+demographic:
+  age_estimation_method: "account_metrics"
+  location_confidence_threshold: 0.6
+  language_detection_method: "bio_keywords"
+  verified_weight: 0.3
+
+behavioral:
+  engagement_aggregation_method: "weighted"
+  engagement_weights:
+    likes: 0.4
+    comments: 0.4
+    shares: 0.2
+  peak_detection_method: "frequency"
+  session_estimation_method: "interaction_gaps"
+  response_time_percentile: 75
+
+interest:
+  min_topic_frequency: 2
+  topic_extraction_method: "keywords"
+  diversity_scoring: True
+
+content_preference:
+  min_format_frequency: 1
+  tone_detection_method: "bio_keywords"
+  length_estimation_method: "post_stats"
+
+namer:
+  archetype_selection_method: "dominant_behavior"
+  descriptors_count: 2
+  description_template: "The {adjective} {archetype}"
+  ensure_uniqueness: True
+
+# Quality thresholds
+quality_thresholds:
+  persona_accuracy_min: 0.88
+  engagement_variance_max: 0.15
+  topic_clarity_min: 0.7
+
+# Performance targets
+performance:
+  persona_generation_ms: 500
+  batch_persona_generation_ms: 2000

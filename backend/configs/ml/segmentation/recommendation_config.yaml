@@ -1,0 +1,53 @@
+# Recommendation Engine Configuration for Day 22
+
+content_recommender:
+  min_topics: 2
+  max_topics: 5
+  topic_diversity_weight: 0.3
+  format_diversity_weight: 0.4
+  sample_hooks_count: 3
+
+timing_recommender:
+  posting_times_count: 3
+  frequency_options:
+    - daily
+    - weekly
+    - bi_weekly
+    - monthly
+  day_preference_method: "frequency"
+
+style_recommender:
+  tone_options:
+    linkedin: ["professional", "thought_leadership", "inspirational"]
+    twitter: ["casual", "witty", "informative"]
+    bluesky: ["authentic", "conversational", "technical"]
+  length_options:
+    - short
+    - medium
+    - long
+  emoji_strategy:
+    linkedin: "minimal"
+    twitter: "moderate"
+    bluesky: "selective"
+  vocabulary_levels:
+    - simple
+    - moderate
+    - advanced
+
+hashtag_recommender:
+  max_hashtags: 5
+  min_hashtags: 1
+  trending_weight: 0.3
+  relevance_weight: 0.7
+
+engine:
+  engagement_lift_estimation_method: "historical_correlation"
+  confidence_calculation_method: "model_calibration"
+  min_confidence: 0.5
+  performance_target_ms: 200
+
+# Quality thresholds
+quality_thresholds:
+  engagement_improvement_min: 0.20
+  recommendation_relevance_min: 0.75
+  diversity_score_min: 0.6
