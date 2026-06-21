@@ -7,6 +7,12 @@ offline (SQL generation) and online (direct execution) modes.
 
 import asyncio
 import os
+import sys
+from pathlib import Path
+
+ROOT_DIR = Path(__file__).resolve().parent.parent
+sys.path.insert(0, str(ROOT_DIR))
+
 from logging.config import fileConfig
 
 from sqlalchemy import pool
