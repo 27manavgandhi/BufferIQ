@@ -1,0 +1,42 @@
+# Video Analysis Configuration
+
+metadata:
+  use_ffprobe: true
+  timeout_seconds: 10
+  
+thumbnails:
+  count: 3
+  quality: 85
+  format: "jpg"
+  output_dir: "/tmp/thumbnails"
+  
+keyframes:
+  max_frames: 10
+  threshold: 30.0  # Difference threshold
+  method: "adaptive"  # adaptive, fixed-interval
+  
+scene_detection:
+  threshold: 30.0
+  min_scene_length: 1.0  # seconds
+  method: "content"  # content, threshold
+  
+audio:
+  analyze: true
+  detect_speech: true
+  detect_music: true
+  sample_rate: 44100
+  
+embeddings:
+  aggregate_method: "mean"  # mean, max, attention
+  dimension: 512
+  
+engagement:
+  optimal_duration_min: 30
+  optimal_duration_max: 90
+  min_resolution_width: 1280
+  
+performance:
+  timeout_seconds: 60
+  max_file_size_mb: 100
+  cache_results: true
+  cache_ttl_hours: 24

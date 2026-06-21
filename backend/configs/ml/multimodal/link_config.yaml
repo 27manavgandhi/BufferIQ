@@ -1,0 +1,37 @@
+# Link Preview Configuration
+
+extraction:
+  timeout_seconds: 10
+  user_agent: "Mozilla/5.0 (compatible; BufferIQ/1.0)"
+  follow_redirects: true
+  max_redirects: 3
+  
+metadata:
+  extract_og_tags: true
+  extract_twitter_tags: true
+  extract_schema_org: false
+  
+quality:
+  optimal_title_length: [40, 70]
+  optimal_description_length: [100, 200]
+  min_image_width: 600
+  min_image_height: 315
+  
+ctr_prediction:
+  model: "heuristic"  # heuristic, ml
+  base_ctr: 0.02
+  platform_multipliers:
+    linkedin: 1.2
+    twitter: 1.0
+    bluesky: 0.9
+  
+optimization:
+  generate_suggestions: true
+  optimize_title: true
+  optimize_description: true
+  max_suggestions: 5
+  
+performance:
+  cache_results: true
+  cache_ttl_hours: 12
+  max_concurrent_requests: 5

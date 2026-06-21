@@ -1,0 +1,54 @@
+# Image Analysis Configuration
+
+preprocessing:
+  max_size: 2048
+  target_size: null  # null for auto
+  
+object_detection:
+  confidence_threshold: 0.5
+  model: "yolo"  # yolo, faster-rcnn
+  max_objects: 20
+  
+ocr:
+  confidence_threshold: 0.6
+  engine: "tesseract"  # tesseract, easyocr
+  languages: ["eng"]
+  
+face_detection:
+  confidence_threshold: 0.7
+  detect_emotions: true
+  detect_age: false
+  detect_gender: false
+  
+color_extraction:
+  n_colors: 5
+  method: "kmeans"  # kmeans, median-cut
+  
+composition:
+  analyze_thirds: true
+  analyze_golden_ratio: true
+  analyze_symmetry: true
+  analyze_balance: true
+  
+aesthetics:
+  include_sharpness: true
+  include_contrast: true
+  include_saturation: true
+  include_brightness: true
+  include_complexity: true
+  
+brand_detection:
+  enabled: true
+  check_watermarks: true
+  check_logos: true
+  
+embeddings:
+  model: "openai/clip-vit-base-patch32"
+  dimension: 512
+  normalize: true
+
+performance:
+  timeout_seconds: 30
+  max_file_size_mb: 10
+  cache_results: true
+  cache_ttl_hours: 24
